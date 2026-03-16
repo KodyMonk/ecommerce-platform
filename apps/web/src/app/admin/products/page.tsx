@@ -1,41 +1,29 @@
 import Link from "next/link";
-import { getAdminProducts } from "@/lib/admin-products";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import AdminProductsTable from "@/components/admin/admin-products-table";
 
-export default async function AdminProductsPage() {
-  const products = await getAdminProducts();
+export const metadata = {
+  title: "Admin Products",
+  description: "Manage store products",
+};
 
+export default function AdminProductsPage() {
   return (
     <main className="container mx-auto px-6 py-10">
-      <div className="flex justify-between mb-6">
-        <h1 className="text-3xl font-semibold">Products</h1>
+      <div className="mb-8 flex items-center justify-between gap-4">
+        <div>
+          <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">
+            Admin
+          </p>
+          <h1 className="mt-2 text-3xl font-semibold">Products</h1>
+        </div>
 
         <Link href="/admin/products/new">
           <Button>Add Product</Button>
         </Link>
       </div>
 
-      <div className="grid gap-4">
-        {products.map((product) => (
-          <Card key={product.id}>
-            <CardContent className="flex justify-between items-center py-4">
-
-              <div>
-                <p className="font-medium">{product.name}</p>
-                <p className="text-sm text-muted-foreground">
-                  {product.slug}
-                </p>
-              </div>
-
-              <Link href={`/admin/products/${product.id}`}>
-                <Button variant="outline">Edit</Button>
-              </Link>
-
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <AdminProductsTable />
     </main>
   );
 }

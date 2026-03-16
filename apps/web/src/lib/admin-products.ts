@@ -2,12 +2,22 @@ import { db } from "@ecommerce/db";
 
 export async function getAdminProducts() {
   return db.product.findMany({
-    orderBy: { createdAt: "desc" },
+    orderBy: {
+      createdAt: "desc",
+    },
     include: {
-      images: true,
-      variants: true,
       brand: true,
       category: true,
+      images: {
+        orderBy: {
+          sortOrder: "asc",
+        },
+      },
+      variants: {
+        orderBy: {
+          createdAt: "asc",
+        },
+      },
     },
   });
 }
@@ -16,10 +26,23 @@ export async function getAdminProduct(id: string) {
   return db.product.findUnique({
     where: { id },
     include: {
-      images: true,
-      variants: true,
       brand: true,
       category: true,
+      images: {
+        orderBy: {
+          sortOrder: "asc",
+        },
+      },
+      variants: {
+        orderBy: {
+          createdAt: "asc",
+        },
+      },
+      options: {
+        include: {
+          values: true,
+        },
+      },
     },
   });
 }
@@ -61,6 +84,24 @@ export async function updateAdminProduct(
       slug: data.slug,
       basePrice: data.basePrice,
       description: data.description || null,
+    },
+  });
+}
+
+export async function toggleAdminProductFeatured(id: string, isFeatured: boolean) {
+  return db.product.update({
+    where: { id },
+    data: {
+      isFeatured,
+    },
+  });
+}
+
+export async function toggleAdminProductActive(id: string, isActive: boolean) {
+  return db.product.update({
+    where: { id },
+    data: {
+      isActive,
     },
   });
 }
