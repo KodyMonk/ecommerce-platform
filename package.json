@@ -15,8 +15,13 @@
     "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
+    "tsx": "^4.21.0",
     "turbo": "^2.5.0",
     "typescript": "^5.8.0"
   },
-  "packageManager": "npm@10.8.2"
+  "packageManager": "npm@10.8.2",
+  "dependencies": {
+    "@prisma/client": "^7.5.0",
+    "prisma": "^7.5.0"
+  }
 }

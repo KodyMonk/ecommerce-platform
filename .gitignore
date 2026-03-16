@@ -8,3 +8,5 @@ dist
 .env.*.local
 coverage
 .DS_Store
+apps/*/node_modules
+packages/*/node_modules
