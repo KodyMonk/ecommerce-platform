@@ -22,9 +22,11 @@ export async function PATCH(req: Request, { params }: Props) {
     const stock = Number(body.stock || 0);
     const brandId = body.brandId ? String(body.brandId) : null;
     const categoryId = body.categoryId ? String(body.categoryId) : null;
-    const imageUrl = body.imageUrl ? String(body.imageUrl) : null;
     const isActive = Boolean(body.isActive);
     const isFeatured = Boolean(body.isFeatured);
+    const imageUrls = Array.isArray(body.imageUrls)
+      ? body.imageUrls.map((item: unknown) => String(item))
+      : [];
 
     if (!name || !slug) {
       return NextResponse.json(
@@ -42,7 +44,7 @@ export async function PATCH(req: Request, { params }: Props) {
       stock,
       brandId,
       categoryId,
-      imageUrl,
+      imageUrls,
       isActive,
       isFeatured,
     });

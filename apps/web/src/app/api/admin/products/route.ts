@@ -15,9 +15,11 @@ export async function POST(req: Request) {
     const stock = Number(body.stock || 0);
     const brandId = body.brandId ? String(body.brandId) : null;
     const categoryId = body.categoryId ? String(body.categoryId) : null;
-    const imageUrl = body.imageUrl ? String(body.imageUrl) : null;
     const isActive = Boolean(body.isActive);
     const isFeatured = Boolean(body.isFeatured);
+    const imageUrls = Array.isArray(body.imageUrls)
+      ? body.imageUrls.map((item: unknown) => String(item))
+      : [];
 
     if (!name || !slug) {
       return NextResponse.json(
@@ -35,7 +37,7 @@ export async function POST(req: Request) {
       stock,
       brandId,
       categoryId,
-      imageUrl,
+      imageUrls,
       isActive,
       isFeatured,
     });

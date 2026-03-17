@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -31,7 +32,7 @@ type Props = {
     categoryId?: string | null;
     isActive?: boolean;
     isFeatured?: boolean;
-    imageUrl?: string | null;
+    imageUrls?: string[];
   };
 };
 
@@ -56,8 +57,17 @@ export default function ProductForm({
     categoryId: initialValues?.categoryId || "",
     isActive: initialValues?.isActive ?? true,
     isFeatured: initialValues?.isFeatured ?? false,
-    imageUrl: initialValues?.imageUrl || "",
+    imageUrlsText: (initialValues?.imageUrls || []).join("\n"),
   });
+
+  const previewImages = useMemo(
+    () =>
+      form.imageUrlsText
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean),
+    [form.imageUrlsText]
+  );
 
   function updateField(name: string, value: string | boolean) {
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -85,6 +95,10 @@ export default function ProductForm({
           ...form,
           basePrice: Number(form.basePrice),
           stock: Number(form.stock),
+          imageUrls: form.imageUrlsText
+            .split("\n")
+            .map((line) => line.trim())
+            .filter(Boolean),
         }),
       });
 
@@ -114,7 +128,10 @@ export default function ProductForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 rounded-3xl border bg-card p-6 shadow-sm">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-6 rounded-3xl border bg-card p-6 shadow-sm"
+    >
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <label className="text-sm font-medium">Product Name</label>
@@ -216,13 +233,46 @@ export default function ProductForm({
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Primary Image URL</label>
-        <Input
-          value={form.imageUrl}
-          onChange={(e) => updateField("imageUrl", e.target.value)}
-          placeholder="https://..."
+        <label className="text-sm font-medium">
+          Product Image URLs
+        </label>
+        <textarea
+          value={form.imageUrlsText}
+          onChange={(e) => updateField("imageUrlsText", e.target.value)}
+          placeholder={`One image URL per line\nhttps://...\nhttps://...`}
+          className="min-h-32 w-full rounded-md border bg-background px-3 py-2 text-sm"
         />
+        <p className="text-xs text-muted-foreground">
+          First image becomes the primary storefront image.
+        </p>
       </div>
+
+      {previewImages.length > 0 ? (
+        <div className="space-y-3">
+          <p className="text-sm font-medium">Image Preview</p>
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            {previewImages.map((url, index) => (
+              <div
+                key={`${url}-${index}`}
+                className="overflow-hidden rounded-xl border bg-muted"
+              >
+                <div className="relative aspect-square">
+                  <Image
+                    src={url}
+                    alt={`Preview ${index + 1}`}
+                    fill
+                    className="object-cover"
+                    sizes="240px"
+                  />
+                </div>
+                <div className="px-3 py-2 text-xs text-muted-foreground">
+                  {index === 0 ? "Primary image" : `Image ${index + 1}`}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       <div className="flex flex-wrap gap-6">
         <label className="flex items-center gap-2 text-sm">

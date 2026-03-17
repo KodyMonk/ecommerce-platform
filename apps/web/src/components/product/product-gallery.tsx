@@ -2,64 +2,80 @@
 
 import { useMemo, useState } from "react";
 import Image from "next/image";
-import type { ProductDTO } from "@ecommerce/types";
-import { cn } from "@/lib/utils";
 
-type Props = {
-  product: ProductDTO;
+type ProductImage = {
+  id: string;
+  url: string;
+  isPrimary: boolean;
+  alt?: string;
 };
 
-export default function ProductGallery({ product }: Props) {
-  const images = useMemo(() => {
-    if (product.images.length > 0) return product.images;
+type Props = {
+  images: ProductImage[];
+  productName: string;
+};
+
+export default function ProductGallery({ images, productName }: Props) {
+  const normalizedImages = useMemo(() => {
+    if (images.length > 0) return images;
+
     return [
       {
-        id: "fallback",
+        id: "placeholder",
         url: "/placeholder.jpg",
-        alt: product.name,
-        sortOrder: 0,
         isPrimary: true,
+        alt: productName,
       },
     ];
-  }, [product]);
+  }, [images, productName]);
 
-  const [selectedImage, setSelectedImage] = useState(images[0]);
+  const initialIndex = Math.max(
+    0,
+    normalizedImages.findIndex((image) => image.isPrimary)
+  );
+
+  const [activeIndex, setActiveIndex] = useState(
+    initialIndex === -1 ? 0 : initialIndex
+  );
+
+  const activeImage = normalizedImages[activeIndex] || normalizedImages[0];
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[88px_minmax(0,1fr)]">
-      <div className="order-2 flex gap-3 overflow-x-auto lg:order-1 lg:flex-col">
-        {images.map((image) => (
-          <button
-            key={image.id}
-            type="button"
-            onClick={() => setSelectedImage(image)}
-            className={cn(
-              "relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border bg-muted",
-              selectedImage.id === image.id && "ring-2 ring-foreground/20"
-            )}
-          >
-            <Image
-              src={image.url}
-              alt={image.alt || product.name}
-              fill
-              className="object-cover"
-              sizes="80px"
-            />
-          </button>
-        ))}
+    <div className="grid gap-4 md:grid-cols-[110px_1fr]">
+      <div className="order-2 flex gap-3 overflow-x-auto md:order-1 md:flex-col">
+        {normalizedImages.map((image, index) => {
+          const isActive = index === activeIndex;
+
+          return (
+            <button
+              key={image.id}
+              type="button"
+              onClick={() => setActiveIndex(index)}
+              className={`relative aspect-square w-24 shrink-0 overflow-hidden border bg-[#fafafa] transition md:w-full ${
+                isActive ? "border-black" : "border-neutral-200"
+              }`}
+            >
+              <Image
+                src={image.url}
+                alt={image.alt || productName}
+                fill
+                className="object-contain p-2"
+                sizes="110px"
+              />
+            </button>
+          );
+        })}
       </div>
 
-      <div className="order-1 lg:order-2">
-        <div className="relative aspect-square overflow-hidden rounded-2xl border bg-muted">
-          <Image
-            src={selectedImage.url}
-            alt={selectedImage.alt || product.name}
-            fill
-            className="object-cover"
-            priority
-            sizes="(max-width: 1024px) 100vw, 50vw"
-          />
-        </div>
+      <div className="order-1 relative aspect-[1/1.08] overflow-hidden border border-neutral-200 bg-[#fafafa] md:order-2">
+        <Image
+          src={activeImage.url}
+          alt={activeImage.alt || productName}
+          fill
+          className="object-contain p-6"
+          sizes="(min-width: 1024px) 42vw, 100vw"
+          priority
+        />
       </div>
     </div>
   );

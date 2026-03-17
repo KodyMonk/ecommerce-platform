@@ -1,6 +1,10 @@
 import { notFound } from "next/navigation";
 import ProductForm from "@/components/admin/product-form";
-import { getAdminBrands, getAdminCategories, getAdminProduct } from "@/lib/admin-products";
+import {
+  getAdminBrands,
+  getAdminCategories,
+  getAdminProduct,
+} from "@/lib/admin-products";
 
 type Props = {
   params: Promise<{
@@ -30,11 +34,6 @@ export default async function AdminEditProductPage({ params }: Props) {
     getAdminCategories(),
   ]);
 
-  const primaryImage =
-    product.images.find((img) => img.isPrimary)?.url ||
-    product.images[0]?.url ||
-    "";
-
   return (
     <main className="px-4 py-6 md:px-6 md:py-8">
       <div className="mb-8">
@@ -62,7 +61,7 @@ export default async function AdminEditProductPage({ params }: Props) {
           categoryId: product.categoryId,
           isActive: product.isActive,
           isFeatured: product.isFeatured,
-          imageUrl: primaryImage,
+          imageUrls: product.images.map((img) => img.url),
         }}
       />
     </main>

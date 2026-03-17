@@ -134,10 +134,16 @@ type ProductInput = {
   categoryId?: string | null;
   isActive: boolean;
   isFeatured: boolean;
-  imageUrl?: string | null;
+  imageUrls?: string[];
 };
 
+function normalizeImageUrls(imageUrls?: string[]) {
+  return (imageUrls || []).map((url) => url.trim()).filter(Boolean);
+}
+
 export async function createAdminProduct(data: ProductInput) {
+  const imageUrls = normalizeImageUrls(data.imageUrls);
+
   return db.product.create({
     data: {
       name: data.name,
@@ -151,15 +157,16 @@ export async function createAdminProduct(data: ProductInput) {
       categoryId: data.categoryId || null,
       isActive: data.isActive,
       isFeatured: data.isFeatured,
-      images: data.imageUrl
-        ? {
-            create: {
-              url: data.imageUrl,
-              isPrimary: true,
-              sortOrder: 0,
-            },
-          }
-        : undefined,
+      images:
+        imageUrls.length > 0
+          ? {
+              create: imageUrls.map((url, index) => ({
+                url,
+                isPrimary: index === 0,
+                sortOrder: index,
+              })),
+            }
+          : undefined,
     },
     include: {
       images: true,
@@ -168,14 +175,7 @@ export async function createAdminProduct(data: ProductInput) {
 }
 
 export async function updateAdminProduct(id: string, data: ProductInput) {
-  const existingImages = await db.productImage.findMany({
-    where: {
-      productId: id,
-    },
-    orderBy: {
-      sortOrder: "asc",
-    },
-  });
+  const imageUrls = normalizeImageUrls(data.imageUrls);
 
   return db.$transaction(async (tx: any) => {
     const product = await tx.product.update({
@@ -194,28 +194,21 @@ export async function updateAdminProduct(id: string, data: ProductInput) {
       },
     });
 
-    if (data.imageUrl) {
-      if (existingImages.length > 0) {
-        await tx.productImage.update({
-          where: {
-            id: existingImages[0].id,
-          },
-          data: {
-            url: data.imageUrl,
-            isPrimary: true,
-            sortOrder: 0,
-          },
-        });
-      } else {
-        await tx.productImage.create({
-          data: {
-            productId: id,
-            url: data.imageUrl,
-            isPrimary: true,
-            sortOrder: 0,
-          },
-        });
-      }
+    await tx.productImage.deleteMany({
+      where: {
+        productId: id,
+      },
+    });
+
+    if (imageUrls.length > 0) {
+      await tx.productImage.createMany({
+        data: imageUrls.map((url, index) => ({
+          productId: id,
+          url,
+          isPrimary: index === 0,
+          sortOrder: index,
+        })),
+      });
     }
 
     return product;

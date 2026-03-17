@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getProductBySlug } from "@/lib/products";
+import ProductActions from "@/components/product/product-actions";
 
 export const runtime = "nodejs";
 

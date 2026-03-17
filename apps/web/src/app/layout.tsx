@@ -1,20 +1,8 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import type { Metadata } from "next";
 import SiteHeader from "@/components/layout/site-header";
 import SiteFooter from "@/components/layout/site-footer";
-import AppSessionProvider from "@/components/providers/session-provider";
-import AppShell from "@/components/layout/app-shell";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import Providers from "./providers";
 
 export const metadata: Metadata = {
   title: {
@@ -31,13 +19,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-  <body
-  className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-background font-sans antialiased`}
->
-  <AppSessionProvider>
-    <AppShell>{children}</AppShell>
-  </AppSessionProvider>
-</body>
-</html>
+      <body className="min-h-screen bg-white text-neutral-900 antialiased">
+        <Providers>
+          <SiteHeader />
+          {children}
+          <SiteFooter />
+        </Providers>
+      </body>
+    </html>
   );
 }

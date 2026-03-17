@@ -5,12 +5,13 @@ import type { ProductDTO } from "@ecommerce/types";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
-import { Truck, ShieldCheck, PackageCheck } from "lucide-react";
-import AddToCartButton from "@/components/product/add-to-cart-button";
+import { Button } from "@/components/ui/button";
+import { Truck, ShieldCheck, PackageCheck, Heart } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 type Props = {
   product: ProductDTO;
-  actions?: React.ReactNode;
 };
 
 type VariantOptionGroup = {
@@ -18,7 +19,10 @@ type VariantOptionGroup = {
   values: string[];
 };
 
-export default function ProductPurchasePanel({ product, actions }: Props) {
+export default function ProductPurchasePanel({ product }: Props) {
+  const router = useRouter();
+  const { data: session } = useSession();
+
   const defaultVariant =
     product.variants.find((variant) => variant.isDefault) ||
     product.variants[0] ||
@@ -57,6 +61,8 @@ export default function ProductPurchasePanel({ product, actions }: Props) {
   const [selectedOptions, setSelectedOptions] =
     useState<Record<string, string>>(initialSelections);
   const [quantity, setQuantity] = useState(1);
+  const [cartLoading, setCartLoading] = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
 
   const selectedVariant = useMemo(() => {
     if (product.variants.length === 0) return null;
@@ -98,27 +104,94 @@ export default function ProductPurchasePanel({ product, actions }: Props) {
     }));
   }
 
+  async function handleAddToCart() {
+    try {
+      setCartLoading(true);
+
+      const res = await fetch("/api/cart/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productId: product.id,
+          variantId: selectedVariant?.id ?? null,
+          quantity,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to add to cart");
+      }
+
+      router.refresh();
+      alert("Added to cart");
+    } catch (error) {
+      console.error(error);
+      alert("Could not add to cart");
+    } finally {
+      setCartLoading(false);
+    }
+  }
+
+  async function handleWishlist() {
+    if (!session?.user) {
+      router.push(`/login?callbackUrl=/products/${product.slug}`);
+      return;
+    }
+
+    try {
+      setWishlistLoading(true);
+
+      const res = await fetch("/api/wishlist/toggle", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productId: product.id,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to update wishlist");
+      }
+
+      router.refresh();
+      alert(data.data.added ? "Added to wishlist" : "Removed from wishlist");
+    } catch (error) {
+      console.error(error);
+      alert("Could not update wishlist");
+    } finally {
+      setWishlistLoading(false);
+    }
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-7">
       <div className="space-y-3">
         {product.brand ? (
-          <p className="text-sm uppercase tracking-[0.24em] text-muted-foreground">
+          <p className="text-sm uppercase tracking-[0.24em] text-neutral-500">
             {product.brand.name}
           </p>
         ) : null}
 
-        <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
+        <h1 className="text-3xl font-semibold uppercase tracking-[0.06em] text-neutral-900 md:text-4xl">
           {product.name}
         </h1>
 
         <div className="flex items-center gap-3">
-          <p className="text-2xl font-semibold">
-            {displayPrice} {product.currency}
+          <p className="text-2xl font-semibold text-neutral-900">
+            BD {Number(displayPrice).toFixed(3)}
           </p>
 
           {displayCompareAt && displayCompareAt > displayPrice ? (
-            <p className="text-base text-muted-foreground line-through">
-              {displayCompareAt} {product.currency}
+            <p className="text-base text-neutral-400 line-through">
+              BD {Number(displayCompareAt).toFixed(3)}
             </p>
           ) : null}
 
@@ -126,7 +199,7 @@ export default function ProductPurchasePanel({ product, actions }: Props) {
         </div>
 
         {product.shortDescription ? (
-          <p className="max-w-xl text-sm leading-6 text-muted-foreground">
+          <p className="max-w-xl text-sm leading-6 text-neutral-600">
             {product.shortDescription}
           </p>
         ) : null}
@@ -138,7 +211,9 @@ export default function ProductPurchasePanel({ product, actions }: Props) {
         <div className="space-y-5">
           {optionGroups.map((group) => (
             <div key={group.name} className="space-y-3">
-              <p className="text-sm font-medium">{group.name}</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">
+                {group.name}
+              </p>
 
               <div className="flex flex-wrap gap-2">
                 {group.values.map((value) => {
@@ -149,10 +224,10 @@ export default function ProductPurchasePanel({ product, actions }: Props) {
                       key={`${group.name}-${value}`}
                       type="button"
                       onClick={() => handleSelectOption(group.name, value)}
-                      className={`rounded-full border px-4 py-2 text-sm transition ${
+                      className={`border px-4 py-2 text-sm transition ${
                         isSelected
-                          ? "border-foreground bg-foreground text-background"
-                          : "border-border bg-background hover:bg-muted"
+                          ? "border-black bg-black text-white"
+                          : "border-neutral-300 bg-white text-neutral-900 hover:border-black"
                       }`}
                     >
                       {value}
@@ -166,13 +241,15 @@ export default function ProductPurchasePanel({ product, actions }: Props) {
       ) : null}
 
       <div className="space-y-3">
-        <p className="text-sm font-medium">Quantity</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">
+          Quantity
+        </p>
 
-        <div className="flex w-fit items-center overflow-hidden rounded-lg border">
+        <div className="flex w-fit items-center overflow-hidden border border-neutral-300">
           <button
             type="button"
             onClick={decreaseQty}
-            className="h-11 w-11 border-r text-lg"
+            className="h-11 w-11 border-r border-neutral-300 text-lg"
           >
             -
           </button>
@@ -186,29 +263,41 @@ export default function ProductPurchasePanel({ product, actions }: Props) {
           <button
             type="button"
             onClick={increaseQty}
-            className="h-11 w-11 border-l text-lg"
+            className="h-11 w-11 border-l border-neutral-300 text-lg"
           >
             +
           </button>
         </div>
 
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-neutral-500">
           {inStock ? `Only ${displayStock} item(s) in stock` : "Out of stock"}
         </p>
       </div>
 
       <div className="space-y-3">
-        <div className="flex items-center gap-3">
-          <AddToCartButton
-            productId={product.id}
-            variantId={selectedVariant?.id ?? null}
-            quantity={quantity}
-            disabled={!inStock}
-          />
-          {actions}
+        <div className="flex flex-wrap gap-3">
+          <Button
+            type="button"
+            onClick={handleAddToCart}
+            disabled={!inStock || cartLoading}
+            className="h-12 min-w-[220px] rounded-none bg-black px-8 text-white hover:bg-neutral-800"
+          >
+            {cartLoading ? "Adding..." : "Add to Cart"}
+          </Button>
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleWishlist}
+            disabled={wishlistLoading}
+            className="h-12 rounded-none border-neutral-300 px-5"
+          >
+            <Heart className="mr-2 h-4 w-4" />
+            {wishlistLoading ? "Saving..." : "Wishlist"}
+          </Button>
         </div>
 
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-neutral-500">
           Items are added to your cart immediately.
         </p>
       </div>
@@ -216,13 +305,15 @@ export default function ProductPurchasePanel({ product, actions }: Props) {
       <Separator />
 
       {product.description ? (
-        <div className="space-y-2">
-          <h2 className="text-sm font-medium">Description</h2>
-          <p className="leading-7 text-muted-foreground">{product.description}</p>
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-neutral-900">
+            Description
+          </h2>
+          <p className="leading-7 text-neutral-600">{product.description}</p>
         </div>
       ) : null}
 
-      <div className="grid gap-3 rounded-2xl border bg-muted/30 p-4 text-sm text-muted-foreground">
+      <div className="grid gap-3 border border-neutral-200 bg-[#fafafa] p-5 text-sm text-neutral-600">
         <div className="flex items-center gap-3">
           <Truck className="h-4 w-4" />
           <span>Fast delivery and shipping updates available</span>
