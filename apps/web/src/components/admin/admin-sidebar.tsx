@@ -10,6 +10,7 @@ import {
   BarChart3,
   TicketPercent,
   Settings,
+  MessageSquare,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,11 @@ const navItems = [
     label: "Products",
     href: "/admin/products",
     icon: Package,
+  },
+  {
+    label: "Reviews",
+    href: "/admin/reviews",
+    icon: MessageSquare,
   },
   {
     label: "Customers",

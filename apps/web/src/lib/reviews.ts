@@ -67,3 +67,56 @@ export async function createReview(input: {
     },
   });
 }
+
+export async function getAdminReviews() {
+  return db.productReview.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      user: true,
+      product: true,
+    },
+  });
+}
+
+export async function toggleReviewVisibility(reviewId: string) {
+  const review = await db.productReview.findUnique({
+    where: {
+      id: reviewId,
+    },
+  });
+
+  if (!review) {
+    throw new Error("Review not found");
+  }
+
+  return db.productReview.update({
+    where: {
+      id: reviewId,
+    },
+    data: {
+      isVisible: !review.isVisible,
+    },
+  });
+}
+
+export async function deleteReview(reviewId: string) {
+  const review = await db.productReview.findUnique({
+    where: {
+      id: reviewId,
+    },
+  });
+
+  if (!review) {
+    throw new Error("Review not found");
+  }
+
+  await db.productReview.delete({
+    where: {
+      id: reviewId,
+    },
+  });
+
+  return { success: true };
+}
