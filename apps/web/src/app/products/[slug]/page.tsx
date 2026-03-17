@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/layout/breadcrumbs";
 import ProductPurchasePanel from "@/components/product/product-purchase-panel";
 import ProductActions from "@/components/product/product-actions";
+import ReviewsSection from "@/components/product/reviews-section";
 import { getProductBySlug } from "@/lib/products";
 
 type Props = {
@@ -109,6 +110,10 @@ export default async function ProductPage({ params }: Props) {
             actions={<ProductActions productId={product.id} />}
           />
         </section>
+      </div>
+
+      <div className="mt-12">
+        <ReviewsSection productId={product.id} />
       </div>
     </main>
   );
