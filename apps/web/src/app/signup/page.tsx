@@ -1,13 +1,16 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 export default function SignupPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/account";
 
   const [form, setForm] = useState({
     name: "",
@@ -44,7 +47,7 @@ export default function SignupPage() {
       await signIn("credentials", {
         email: form.email,
         password: form.password,
-        callbackUrl: "/account",
+        callbackUrl,
         redirect: true,
       });
     } catch (error) {
@@ -59,8 +62,14 @@ export default function SignupPage() {
       <div className="w-full rounded-2xl border p-6">
         <h1 className="mb-2 text-3xl font-semibold">Create Account</h1>
         <p className="mb-6 text-sm text-muted-foreground">
-          Sign up to save orders and manage your account.
+          Sign up to save orders, addresses, and wishlist items.
         </p>
+
+        {callbackUrl === "/checkout" ? (
+          <div className="mb-4 rounded-lg border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+            Create an account to make checkout faster and reuse saved addresses.
+          </div>
+        ) : null}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
@@ -90,6 +99,25 @@ export default function SignupPage() {
             {loading ? "Creating account..." : "Sign up"}
           </Button>
         </form>
+
+        <p className="mt-6 text-sm text-muted-foreground">
+          Already have an account?{" "}
+          <Link
+            href={`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`}
+            className="font-medium text-foreground underline"
+          >
+            Sign in
+          </Link>
+        </p>
+
+        {callbackUrl === "/checkout" ? (
+          <p className="mt-4 text-sm text-muted-foreground">
+            Prefer not to create an account?{" "}
+            <Link href="/checkout?mode=guest" className="font-medium underline">
+              Continue as guest
+            </Link>
+          </p>
+        ) : null}
       </div>
     </main>
   );

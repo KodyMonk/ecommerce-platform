@@ -3,69 +3,33 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 type Props = {
   orderNumber: string;
-  currentStatus: string;
-  currentPaymentStatus: string;
-  currentFulfillmentStatus: string;
-  currentTrackingNumber?: string | null;
-  currentShippingCarrier?: string | null;
+  initialStatus: "PENDING" | "CONFIRMED" | "CANCELLED";
+  initialPaymentStatus: "PENDING" | "PAID" | "FAILED";
+  initialFulfillmentStatus:
+    | "UNFULFILLED"
+    | "SHIPPED"
+    | "OUT_FOR_DELIVERY"
+    | "DELIVERED";
 };
-
-const orderStatuses = [
-  "PENDING",
-  "CONFIRMED",
-  "PROCESSING",
-  "PACKED",
-  "SHIPPED",
-  "OUT_FOR_DELIVERY",
-  "DELIVERED",
-  "CANCELLED",
-  "RETURNED",
-  "REFUNDED",
-];
-
-const paymentStatuses = [
-  "PENDING",
-  "AUTHORIZED",
-  "PAID",
-  "FAILED",
-  "REFUNDED",
-  "PARTIALLY_REFUNDED",
-];
-
-const fulfillmentStatuses = [
-  "UNFULFILLED",
-  "PARTIALLY_FULFILLED",
-  "FULFILLED",
-  "RETURNED",
-];
 
 export default function OrderStatusForm({
   orderNumber,
-  currentStatus,
-  currentPaymentStatus,
-  currentFulfillmentStatus,
-  currentTrackingNumber,
-  currentShippingCarrier,
+  initialStatus,
+  initialPaymentStatus,
+  initialFulfillmentStatus,
 }: Props) {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
 
-  const [status, setStatus] = useState(currentStatus);
-  const [paymentStatus, setPaymentStatus] = useState(currentPaymentStatus);
+  const [status, setStatus] = useState(initialStatus);
+  const [paymentStatus, setPaymentStatus] = useState(initialPaymentStatus);
   const [fulfillmentStatus, setFulfillmentStatus] = useState(
-    currentFulfillmentStatus
-  );
-  const [trackingNumber, setTrackingNumber] = useState(
-    currentTrackingNumber || ""
-  );
-  const [shippingCarrier, setShippingCarrier] = useState(
-    currentShippingCarrier || ""
+    initialFulfillmentStatus
   );
   const [note, setNote] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -82,8 +46,6 @@ export default function OrderStatusForm({
           status,
           paymentStatus,
           fulfillmentStatus,
-          trackingNumber,
-          shippingCarrier,
           note,
         }),
       });
@@ -94,9 +56,8 @@ export default function OrderStatusForm({
         throw new Error(data.error || "Failed to update order");
       }
 
-      router.refresh();
       setNote("");
-      alert("Order updated");
+      router.refresh();
     } catch (error) {
       console.error(error);
       alert("Could not update order");
@@ -108,72 +69,71 @@ export default function OrderStatusForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="mb-2 block text-sm font-medium">Order status</label>
+        <label className="mb-2 block text-sm font-medium">Order Status</label>
         <select
           value={status}
-          onChange={(e) => setStatus(e.target.value)}
+          onChange={(e) =>
+            setStatus(e.target.value as "PENDING" | "CONFIRMED" | "CANCELLED")
+          }
           className="h-11 w-full rounded-md border bg-background px-3 text-sm"
         >
-          {orderStatuses.map((value) => (
-            <option key={value} value={value}>
-              {value.replaceAll("_", " ")}
-            </option>
-          ))}
+          <option value="PENDING">PENDING</option>
+          <option value="CONFIRMED">CONFIRMED</option>
+          <option value="CANCELLED">CANCELLED</option>
         </select>
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-medium">Payment status</label>
+        <label className="mb-2 block text-sm font-medium">Payment Status</label>
         <select
           value={paymentStatus}
-          onChange={(e) => setPaymentStatus(e.target.value)}
+          onChange={(e) =>
+            setPaymentStatus(e.target.value as "PENDING" | "PAID" | "FAILED")
+          }
           className="h-11 w-full rounded-md border bg-background px-3 text-sm"
         >
-          {paymentStatuses.map((value) => (
-            <option key={value} value={value}>
-              {value.replaceAll("_", " ")}
-            </option>
-          ))}
+          <option value="PENDING">PENDING</option>
+          <option value="PAID">PAID</option>
+          <option value="FAILED">FAILED</option>
         </select>
       </div>
 
       <div>
         <label className="mb-2 block text-sm font-medium">
-          Fulfillment status
+          Fulfillment Status
         </label>
         <select
           value={fulfillmentStatus}
-          onChange={(e) => setFulfillmentStatus(e.target.value)}
+          onChange={(e) =>
+            setFulfillmentStatus(
+              e.target.value as
+                | "UNFULFILLED"
+                | "SHIPPED"
+                | "OUT_FOR_DELIVERY"
+                | "DELIVERED"
+            )
+          }
           className="h-11 w-full rounded-md border bg-background px-3 text-sm"
         >
-          {fulfillmentStatuses.map((value) => (
-            <option key={value} value={value}>
-              {value.replaceAll("_", " ")}
-            </option>
-          ))}
+          <option value="UNFULFILLED">UNFULFILLED</option>
+          <option value="SHIPPED">SHIPPED</option>
+          <option value="OUT_FOR_DELIVERY">OUT_FOR_DELIVERY</option>
+          <option value="DELIVERED">DELIVERED</option>
         </select>
       </div>
 
-      <Input
-        placeholder="Tracking number"
-        value={trackingNumber}
-        onChange={(e) => setTrackingNumber(e.target.value)}
-      />
+      <div>
+        <label className="mb-2 block text-sm font-medium">Admin Note</label>
+        <textarea
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder="Optional note for this status update"
+          className="min-h-24 w-full rounded-md border bg-background px-3 py-2 text-sm"
+        />
+      </div>
 
-      <Input
-        placeholder="Shipping carrier"
-        value={shippingCarrier}
-        onChange={(e) => setShippingCarrier(e.target.value)}
-      />
-
-      <Input
-        placeholder="Admin note"
-        value={note}
-        onChange={(e) => setNote(e.target.value)}
-      />
-
-      <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? "Updating..." : "Update order"}
+      <Button type="submit" disabled={loading} className="w-full">
+        {loading ? "Updating..." : "Update Order"}
       </Button>
     </form>
   );

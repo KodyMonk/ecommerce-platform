@@ -38,6 +38,12 @@ export default function LoginPage() {
           Sign in to access your account.
         </p>
 
+        {callbackUrl === "/checkout" ? (
+          <div className="mb-4 rounded-lg border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+            Sign in to use your saved addresses and account details during checkout.
+          </div>
+        ) : null}
+
         {error ? (
           <div className="mb-4 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
             Invalid email or password.
@@ -68,10 +74,22 @@ export default function LoginPage() {
 
         <p className="mt-6 text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
-          <Link href="/signup" className="font-medium text-foreground underline">
+          <Link
+            href={`/signup?callbackUrl=${encodeURIComponent(callbackUrl)}`}
+            className="font-medium text-foreground underline"
+          >
             Create one
           </Link>
         </p>
+
+        {callbackUrl === "/checkout" ? (
+          <p className="mt-4 text-sm text-muted-foreground">
+            Prefer not to sign in?{" "}
+            <Link href="/checkout?mode=guest" className="font-medium underline">
+              Continue as guest
+            </Link>
+          </p>
+        ) : null}
       </div>
     </main>
   );

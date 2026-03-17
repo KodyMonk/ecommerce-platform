@@ -7,20 +7,22 @@ export async function getAdminOrders() {
     },
     include: {
       user: true,
-      items: true,
       shippingAddress: true,
+      items: true,
     },
   });
 }
 
 export async function getAdminOrderByNumber(orderNumber: string) {
   return db.order.findUnique({
-    where: { orderNumber },
+    where: {
+      orderNumber,
+    },
     include: {
       user: true,
-      items: true,
       shippingAddress: true,
       billingAddress: true,
+      items: true,
       statusHistory: {
         orderBy: {
           createdAt: "asc",
@@ -30,70 +32,47 @@ export async function getAdminOrderByNumber(orderNumber: string) {
   });
 }
 
-type UpdateOrderStatusInput = {
+export async function updateAdminOrder(input: {
   orderNumber: string;
-  status: string;
-  paymentStatus?: string;
-  fulfillmentStatus?: string;
-  trackingNumber?: string;
-  shippingCarrier?: string;
+  status: "PENDING" | "CONFIRMED" | "CANCELLED";
+  paymentStatus: "PENDING" | "PAID" | "FAILED";
+  fulfillmentStatus: "UNFULFILLED" | "SHIPPED" | "OUT_FOR_DELIVERY" | "DELIVERED";
   note?: string;
-};
-
-export async function updateAdminOrderStatus(input: UpdateOrderStatusInput) {
+}) {
   const order = await db.order.findUnique({
-    where: { orderNumber: input.orderNumber },
+    where: {
+      orderNumber: input.orderNumber,
+    },
   });
 
   if (!order) {
     throw new Error("Order not found");
   }
 
-  const now = new Date();
-
-  const updateData: Record<string, unknown> = {
-    status: input.status,
-    paymentStatus: input.paymentStatus || order.paymentStatus,
-    fulfillmentStatus: input.fulfillmentStatus || order.fulfillmentStatus,
-    trackingNumber: input.trackingNumber || null,
-    shippingCarrier: input.shippingCarrier || null,
-  };
-
-  if (input.status === "SHIPPED") {
-    updateData.shippedAt = now;
-  }
-
-  if (input.status === "OUT_FOR_DELIVERY") {
-    updateData.outForDeliveryAt = now;
-  }
-
-  if (input.status === "DELIVERED") {
-    updateData.deliveredAt = now;
-  }
-
-  if (input.status === "CANCELLED") {
-    updateData.cancelledAt = now;
-  }
-
-  return db.$transaction(async (tx) => {
-    const updated = await tx.order.update({
-      where: { orderNumber: input.orderNumber },
-      data: updateData,
+  const updated = await db.$transaction(async (tx: any) => {
+    const nextOrder = await tx.order.update({
+      where: {
+        id: order.id,
+      },
+      data: {
+        status: input.status,
+        paymentStatus: input.paymentStatus,
+        fulfillmentStatus: input.fulfillmentStatus,
+      },
     });
 
     await tx.orderStatusHistory.create({
       data: {
-        orderId: updated.id,
-        status: input.status as never,
-        paymentStatus: (input.paymentStatus || updated.paymentStatus) as never,
-        fulfillmentStatus: (input.fulfillmentStatus ||
-          updated.fulfillmentStatus) as never,
-        trackingNumber: input.trackingNumber || null,
-        shippingCarrier: input.shippingCarrier || null,
-        note: input.note || null,
+        orderId: order.id,
+        status: input.status,
+        paymentStatus: input.paymentStatus,
+        fulfillmentStatus: input.fulfillmentStatus,
+        note: input.note || "Order updated by admin",
       },
     });
 
-    return updated;
+    return nextOrder;
   });
+
+  return updated;
 }

@@ -42,21 +42,18 @@ export default function AdminTopbar({ onOpenSidebar }: Props) {
           <Button variant="outline" size="icon" aria-label="Notifications">
             <Bell className="h-4 w-4" />
           </Button>
-          
 
-          <div className="ml-1 flex items-center gap-2">
-  <div className="rounded-full border px-3 py-1.5 text-sm font-medium">
-    Admin
-  </div>
+          <div className="ml-1 rounded-full border px-3 py-1.5 text-sm font-medium">
+            Admin
+          </div>
 
-  <Button
-    variant="outline"
-    size="sm"
-    onClick={() => signOut({ callbackUrl: "/login" })}
-  >
-    Logout
-  </Button>
-</div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => signOut({ callbackUrl: "/login" })}
+          >
+            Logout
+          </Button>
         </div>
       </div>
     </header>
