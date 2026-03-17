@@ -1,44 +1,81 @@
-import "dotenv/config";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "../generated/prisma/client";
-import { Pool } from "pg";
-
-const connectionString = process.env.DATABASE_URL;
-
-if (!connectionString) {
-  throw new Error("DATABASE_URL is not set");
-}
-
-const pool = new Pool({
-  connectionString,
-});
-
-const adapter = new PrismaPg(pool);
-
-const prisma = new PrismaClient({
-  adapter,
-});
+import bcrypt from "bcryptjs";
+import { db } from "../src";
 
 async function main() {
   console.log("Seeding database...");
 
-  const perfumeCategory = await prisma.category.create({
-    data: {
-      name: "Perfumes",
-      slug: "perfumes",
-      description: "Luxury fragrances",
+  const hashedPassword = await bcrypt.hash("admin12345", 10);
+
+  const admin = await db.user.upsert({
+    where: {
+      email: "admin@shop.com",
+    },
+    update: {
+      name: "Admin",
+      role: "ADMIN",
+      password: hashedPassword,
+      isActive: true,
+    },
+    create: {
+      email: "admin@shop.com",
+      name: "Admin",
+      role: "ADMIN",
+      password: hashedPassword,
+      isActive: true,
     },
   });
 
-  const tiffany = await prisma.brand.create({
-    data: {
-      name: "Tiffany & Co",
+  console.log("Admin seeded:", admin.email);
+
+  const brand = await db.brand.upsert({
+    where: {
       slug: "tiffany-co",
     },
+    update: {
+      name: "Tiffany & Co",
+      isActive: true,
+    },
+    create: {
+      name: "Tiffany & Co",
+      slug: "tiffany-co",
+      isActive: true,
+    },
   });
 
-  const perfume = await prisma.product.create({
-    data: {
+  const category = await db.category.upsert({
+    where: {
+      slug: "perfumes",
+    },
+    update: {
+      name: "Perfumes",
+      isActive: true,
+      sortOrder: 1,
+    },
+    create: {
+      name: "Perfumes",
+      slug: "perfumes",
+      isActive: true,
+      sortOrder: 1,
+    },
+  });
+
+  const product = await db.product.upsert({
+    where: {
+      slug: "tiffany-edp-intense",
+    },
+    update: {
+      name: "Tiffany & Co Eau De Parfum Intense",
+      shortDescription: "Luxury fragrance",
+      description: "Rich iris fragrance with amber and vanilla.",
+      basePrice: 68.2,
+      stock: 10,
+      currency: "BHD",
+      isActive: true,
+      isFeatured: true,
+      brandId: brand.id,
+      categoryId: category.id,
+    },
+    create: {
       name: "Tiffany & Co Eau De Parfum Intense",
       slug: "tiffany-edp-intense",
       shortDescription: "Luxury fragrance",
@@ -46,81 +83,117 @@ async function main() {
       basePrice: 68.2,
       stock: 10,
       currency: "BHD",
-      categoryId: perfumeCategory.id,
-      brandId: tiffany.id,
       isActive: true,
       isFeatured: true,
+      brandId: brand.id,
+      categoryId: category.id,
     },
   });
 
-  const sizeOption = await prisma.productOption.create({
+  // Clean old seed-related rows for this product so the seed is repeatable
+  await db.productVariantValue.deleteMany({
+    where: {
+      variant: {
+        productId: product.id,
+      },
+    },
+  });
+
+  await db.productVariant.deleteMany({
+    where: {
+      productId: product.id,
+    },
+  });
+
+  await db.productOptionValue.deleteMany({
+    where: {
+      option: {
+        productId: product.id,
+      },
+    },
+  });
+
+  await db.productOption.deleteMany({
+    where: {
+      productId: product.id,
+    },
+  });
+
+  await db.productImage.deleteMany({
+    where: {
+      productId: product.id,
+    },
+  });
+
+  await db.productImage.create({
     data: {
-      productId: perfume.id,
-      name: "Size",
+      productId: product.id,
+      url: "https://images.unsplash.com/photo-1594035910387-fea47794261f",
+      alt: "Tiffany & Co Eau De Parfum Intense",
+      isPrimary: true,
+      sortOrder: 0,
     },
   });
 
-  const size75 = await prisma.productOptionValue.create({
+  const sizeOption = await db.productOption.create({
+    data: {
+      productId: product.id,
+      name: "Size",
+      sortOrder: 0,
+    },
+  });
+
+  const size75 = await db.productOptionValue.create({
     data: {
       optionId: sizeOption.id,
       value: "75ml",
+      sortOrder: 0,
     },
   });
 
-  const size100 = await prisma.productOptionValue.create({
+  const size100 = await db.productOptionValue.create({
     data: {
       optionId: sizeOption.id,
       value: "100ml",
+      sortOrder: 1,
     },
   });
 
-  const variant75 = await prisma.productVariant.create({
+  const variant75 = await db.productVariant.create({
     data: {
-      productId: perfume.id,
+      productId: product.id,
       title: "75ml",
+      stock: 5,
       price: 68.2,
-      stock: 5,
       isDefault: true,
+      isActive: true,
+      trackInventory: true,
     },
   });
 
-  const variant100 = await prisma.productVariant.create({
-    data: {
-      productId: perfume.id,
-      title: "100ml",
-      price: 82.5,
-      stock: 5,
-    },
-  });
-
-  await prisma.productVariantValue.create({
+  await db.productVariantValue.create({
     data: {
       variantId: variant75.id,
       optionValueId: size75.id,
     },
   });
 
-  await prisma.productVariantValue.create({
+  const variant100 = await db.productVariant.create({
+    data: {
+      productId: product.id,
+      title: "100ml",
+      stock: 5,
+      price: 82.5,
+      isDefault: false,
+      isActive: true,
+      trackInventory: true,
+    },
+  });
+
+  await db.productVariantValue.create({
     data: {
       variantId: variant100.id,
       optionValueId: size100.id,
-    },
-  });
-
-  await prisma.coupon.create({
-    data: {
-      code: "WELCOME10",
-      discountType: "PERCENTAGE",
-      discountValue: 10,
-      isActive: true,
-    },
-  });
-
-  await prisma.user.create({
-    data: {
-      email: "admin@shop.com",
-      name: "Admin",
-      role: "ADMIN",
     },
   });
 
@@ -128,13 +201,10 @@ async function main() {
 }
 
 main()
-  .then(async () => {
-    await prisma.$disconnect();
-    await pool.end();
-  })
-  .catch(async (e) => {
-    console.error(e);
-    await prisma.$disconnect();
-    await pool.end();
+  .catch((e) => {
+    console.error("Seed failed:", e);
     process.exit(1);
+  })
+  .finally(async () => {
+    await db.$disconnect();
   });

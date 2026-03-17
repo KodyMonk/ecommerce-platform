@@ -1,3 +1,4 @@
+import { auth } from "@/auth";
 import { db } from "@ecommerce/db";
 
 export async function getOrCreateGuestUser() {
@@ -14,8 +15,25 @@ export async function getOrCreateGuestUser() {
       email,
       name: "Guest User",
       role: "CUSTOMER",
+      isActive: true,
     },
   });
+}
+
+export async function getCurrentCartUser() {
+  const session = await auth();
+
+  if (session?.user?.email) {
+    const existingUser = await db.user.findUnique({
+      where: {
+        email: session.user.email,
+      },
+    });
+
+    if (existingUser) return existingUser;
+  }
+
+  return getOrCreateGuestUser();
 }
 
 const cartInclude = {
@@ -48,7 +66,7 @@ const cartInclude = {
 } as const;
 
 export async function getOrCreateCart() {
-  const user = await getOrCreateGuestUser();
+  const user = await getCurrentCartUser();
 
   const existingCart = await db.cart.findUnique({
     where: { userId: user.id },

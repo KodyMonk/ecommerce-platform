@@ -13,8 +13,15 @@ export async function POST(req: Request) {
     const product = await createAdminProduct({
       name: data.name,
       slug: data.slug,
-      basePrice: Number(data.basePrice),
       description: data.description || "",
+      shortDescription: data.shortDescription || "",
+      basePrice: Number(data.basePrice),
+      stock: Number(data.stock || 0),
+      brandId: data.brandId || null,
+      categoryId: data.categoryId || null,
+      isActive: Boolean(data.isActive),
+      isFeatured: Boolean(data.isFeatured),
+      imageUrl: data.imageUrl || null,
     });
 
     return NextResponse.json({
@@ -45,8 +52,15 @@ export async function PATCH(req: Request) {
     const product = await updateAdminProduct(data.id, {
       name: data.name,
       slug: data.slug,
-      basePrice: Number(data.basePrice),
       description: data.description || "",
+      shortDescription: data.shortDescription || "",
+      basePrice: Number(data.basePrice),
+      stock: Number(data.stock || 0),
+      brandId: data.brandId || null,
+      categoryId: data.categoryId || null,
+      isActive: Boolean(data.isActive),
+      isFeatured: Boolean(data.isFeatured),
+      imageUrl: data.imageUrl || null,
     });
 
     return NextResponse.json({

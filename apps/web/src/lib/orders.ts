@@ -1,5 +1,5 @@
 import { db } from "@ecommerce/db";
-import { getCart, getOrCreateGuestUser } from "@/lib/cart";
+import { getCart, getCurrentCartUser } from "@/lib/cart";
 
 type CheckoutInput = {
   fullName: string;
@@ -28,7 +28,7 @@ export async function createOrderFromCart(input: CheckoutInput) {
     throw new Error("Cart is empty");
   }
 
-  const user = await getOrCreateGuestUser();
+  const user = await getCurrentCartUser();
 
   const subtotal = cart.items.reduce((sum, item) => {
     const unitPrice = Number(item.variant?.price ?? item.product.basePrice);
@@ -157,6 +157,28 @@ export async function getOrderByNumber(orderNumber: string) {
       shippingAddress: true,
       billingAddress: true,
       items: true,
+      statusHistory: {
+        orderBy: {
+          createdAt: "asc",
+        },
+      },
+    },
+  });
+}
+
+export async function getOrdersForCurrentUser() {
+  const user = await getCurrentCartUser();
+
+  return db.order.findMany({
+    where: {
+      userId: user.id,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      items: true,
+      shippingAddress: true,
       statusHistory: {
         orderBy: {
           createdAt: "asc",

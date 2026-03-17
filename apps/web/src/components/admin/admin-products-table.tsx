@@ -3,11 +3,34 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import AdminProductStatusToggle from "@/components/admin/admin-product-status-toggle";
-import { getAdminProducts } from "@/lib/admin-products";
+import AdminProductDeleteButton from "@/components/admin/admin-product-delete-button";
 
-export default async function AdminProductsTable() {
-  const products = await getAdminProducts();
+type ProductItem = {
+  id: string;
+  name: string;
+  slug: string;
+  basePrice: number | string;
+  currency: string;
+  stock: number;
+  isFeatured: boolean;
+  isActive: boolean;
+  brand: { name: string } | null;
+  category: { name: string } | null;
+  images: {
+    id: string;
+    url: string;
+    isPrimary: boolean;
+  }[];
+  variants: {
+    stock: number;
+  }[];
+};
 
+type Props = {
+  products: ProductItem[];
+};
+
+export default function AdminProductsTable({ products }: Props) {
   return (
     <div className="overflow-hidden rounded-2xl border">
       <table className="w-full text-sm">
@@ -105,11 +128,22 @@ export default async function AdminProductsTable() {
                         value={product.isActive}
                       />
 
+                      <Link href={`/products/${product.slug}`} target="_blank">
+                        <Button variant="outline" size="sm">
+                          View Product
+                        </Button>
+                      </Link>
+
                       <Link href={`/admin/products/${product.id}`}>
                         <Button variant="outline" size="sm">
                           Edit
                         </Button>
                       </Link>
+
+                      <AdminProductDeleteButton
+                        productId={product.id}
+                        productName={product.name}
+                      />
                     </div>
                   </td>
                 </tr>

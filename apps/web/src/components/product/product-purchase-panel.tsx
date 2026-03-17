@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 import type { ProductDTO } from "@ecommerce/types";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Truck, ShieldCheck, PackageCheck } from "lucide-react";
@@ -13,21 +12,67 @@ type Props = {
   product: ProductDTO;
 };
 
+type VariantOptionGroup = {
+  name: string;
+  values: string[];
+};
+
 export default function ProductPurchasePanel({ product }: Props) {
   const defaultVariant =
     product.variants.find((variant) => variant.isDefault) || product.variants[0] || null;
 
-  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
-    defaultVariant?.id ?? null
-  );
+  const optionGroups = useMemo<VariantOptionGroup[]>(() => {
+    const map = new Map<string, Set<string>>();
+
+    for (const variant of product.variants) {
+      for (const value of variant.values) {
+        if (!map.has(value.optionName)) {
+          map.set(value.optionName, new Set());
+        }
+        map.get(value.optionName)!.add(value.value);
+      }
+    }
+
+    return Array.from(map.entries()).map(([name, values]) => ({
+      name,
+      values: Array.from(values),
+    }));
+  }, [product.variants]);
+
+  const initialSelections = useMemo(() => {
+    const selections: Record<string, string> = {};
+
+    if (defaultVariant) {
+      for (const value of defaultVariant.values) {
+        selections[value.optionName] = value.value;
+      }
+    }
+
+    return selections;
+  }, [defaultVariant]);
+
+  const [selectedOptions, setSelectedOptions] =
+    useState<Record<string, string>>(initialSelections);
   const [quantity, setQuantity] = useState(1);
 
-  const selectedVariant = useMemo(
-    () =>
-      product.variants.find((variant) => variant.id === selectedVariantId) ||
-      defaultVariant,
-    [defaultVariant, product.variants, selectedVariantId]
-  );
+  const selectedVariant = useMemo(() => {
+    if (product.variants.length === 0) return null;
+    if (optionGroups.length === 0) return defaultVariant;
+
+    const match = product.variants.find((variant) => {
+      return optionGroups.every((group) => {
+        const selectedValue = selectedOptions[group.name];
+        if (!selectedValue) return false;
+
+        return variant.values.some(
+          (value) =>
+            value.optionName === group.name && value.value === selectedValue
+        );
+      });
+    });
+
+    return match || defaultVariant;
+  }, [defaultVariant, optionGroups, product.variants, selectedOptions]);
 
   const displayPrice = selectedVariant?.price ?? product.basePrice;
   const displayCompareAt =
@@ -43,9 +88,12 @@ export default function ProductPurchasePanel({ product }: Props) {
     setQuantity((prev) => Math.max(prev - 1, 1));
   }
 
-  const optionLabel =
-    selectedVariant?.values.map((value) => `${value.optionName}: ${value.value}`).join(" • ") ||
-    null;
+  function handleSelectOption(optionName: string, value: string) {
+    setSelectedOptions((prev) => ({
+      ...prev,
+      [optionName]: value,
+    }));
+  }
 
   return (
     <div className="space-y-6">
@@ -83,34 +131,34 @@ export default function ProductPurchasePanel({ product }: Props) {
 
       <Separator />
 
-      {product.variants.length > 0 ? (
-        <div className="space-y-3">
-          <p className="text-sm font-medium">Select option</p>
-          <div className="flex flex-wrap gap-2">
-            {product.variants.map((variant) => {
-              const label =
-                variant.values.map((value) => value.value).join(" / ") || variant.title;
+      {optionGroups.length > 0 ? (
+        <div className="space-y-5">
+          {optionGroups.map((group) => (
+            <div key={group.name} className="space-y-3">
+              <p className="text-sm font-medium">{group.name}</p>
 
-              return (
-                <button
-                  key={variant.id}
-                  type="button"
-                  onClick={() => setSelectedVariantId(variant.id)}
-                  className={`rounded-full border px-4 py-2 text-sm transition ${
-                    selectedVariant?.id === variant.id
-                      ? "border-foreground bg-foreground text-background"
-                      : "border-border bg-background hover:bg-muted"
-                  }`}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
+              <div className="flex flex-wrap gap-2">
+                {group.values.map((value) => {
+                  const isSelected = selectedOptions[group.name] === value;
 
-          {optionLabel ? (
-            <p className="text-sm text-muted-foreground">{optionLabel}</p>
-          ) : null}
+                  return (
+                    <button
+                      key={`${group.name}-${value}`}
+                      type="button"
+                      onClick={() => handleSelectOption(group.name, value)}
+                      className={`rounded-full border px-4 py-2 text-sm transition ${
+                        isSelected
+                          ? "border-foreground bg-foreground text-background"
+                          : "border-border bg-background hover:bg-muted"
+                      }`}
+                    >
+                      {value}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       ) : null}
 
@@ -147,17 +195,17 @@ export default function ProductPurchasePanel({ product }: Props) {
       </div>
 
       <div className="space-y-3">
-  <AddToCartButton
-    productId={product.id}
-    variantId={selectedVariant?.id ?? null}
-    quantity={quantity}
-    disabled={!inStock}
-  />
+        <AddToCartButton
+          productId={product.id}
+          variantId={selectedVariant?.id ?? null}
+          quantity={quantity}
+          disabled={!inStock}
+        />
 
-  <p className="text-xs text-muted-foreground">
-    Items are added to your cart immediately.
-  </p>
-</div>
+        <p className="text-xs text-muted-foreground">
+          Items are added to your cart immediately.
+        </p>
+      </div>
 
       <Separator />
 
