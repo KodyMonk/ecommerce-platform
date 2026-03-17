@@ -14,14 +14,13 @@ function decimalToNumber(value: unknown): number | null {
   return Number(value);
 }
 
-function mapVariant(variant: {
+type VariantInput = {
   id: string;
-  title: string;
+  title: string | null;
   sku: string | null;
   price: unknown;
   compareAtPrice: unknown;
   stock: number;
-  imageUrl: string | null;
   isDefault: boolean;
   isActive: boolean;
   values: {
@@ -32,15 +31,17 @@ function mapVariant(variant: {
       };
     };
   }[];
-}): ProductVariantDTO {
+};
+
+function mapVariant(variant: VariantInput): ProductVariantDTO {
   return {
     id: variant.id,
-    title: variant.title,
+    title: variant.title ?? "",
     sku: variant.sku,
     price: decimalToNumber(variant.price),
     compareAtPrice: decimalToNumber(variant.compareAtPrice),
     stock: variant.stock,
-    imageUrl: variant.imageUrl,
+    imageUrl: null,
     isDefault: variant.isDefault,
     isActive: variant.isActive,
     values: variant.values.map((entry) => ({
@@ -70,10 +71,7 @@ export async function getProducts(): Promise<ProductDTO[]> {
         where: {
           isActive: true,
         },
-        orderBy: [
-          { isDefault: "desc" },
-          { createdAt: "asc" },
-        ],
+        orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
         include: {
           values: {
             include: {
@@ -119,15 +117,17 @@ export async function getProducts(): Promise<ProductDTO[]> {
     images: product.images.map((image) => ({
       id: image.id,
       url: image.url,
-      alt: image.alt,
+      alt: "",
       sortOrder: image.sortOrder,
       isPrimary: image.isPrimary,
     })),
-    variants: product.variants.map(mapVariant),
+    variants: product.variants.map((variant) => mapVariant(variant)),
   }));
 }
 
-export async function getProductBySlug(slug: string): Promise<ProductDTO | null> {
+export async function getProductBySlug(
+  slug: string
+): Promise<ProductDTO | null> {
   const product = await db.product.findFirst({
     where: {
       slug,
@@ -145,10 +145,7 @@ export async function getProductBySlug(slug: string): Promise<ProductDTO | null>
         where: {
           isActive: true,
         },
-        orderBy: [
-          { isDefault: "desc" },
-          { createdAt: "asc" },
-        ],
+        orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
         include: {
           values: {
             include: {
@@ -196,10 +193,10 @@ export async function getProductBySlug(slug: string): Promise<ProductDTO | null>
     images: product.images.map((image) => ({
       id: image.id,
       url: image.url,
-      alt: image.alt,
+      alt: "",
       sortOrder: image.sortOrder,
       isPrimary: image.isPrimary,
     })),
-    variants: product.variants.map(mapVariant),
+    variants: product.variants.map((variant) => mapVariant(variant)),
   };
 }

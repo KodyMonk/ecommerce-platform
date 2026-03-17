@@ -38,11 +38,6 @@ export type Brand = Prisma.BrandModel
  */
 export type Category = Prisma.CategoryModel
 /**
- * Model Tag
- * 
- */
-export type Tag = Prisma.TagModel
-/**
  * Model Product
  * 
  */
@@ -73,31 +68,6 @@ export type ProductVariant = Prisma.ProductVariantModel
  */
 export type ProductVariantValue = Prisma.ProductVariantValueModel
 /**
- * Model ProductTag
- * 
- */
-export type ProductTag = Prisma.ProductTagModel
-/**
- * Model Coupon
- * 
- */
-export type Coupon = Prisma.CouponModel
-/**
- * Model CouponProduct
- * 
- */
-export type CouponProduct = Prisma.CouponProductModel
-/**
- * Model CouponCategory
- * 
- */
-export type CouponCategory = Prisma.CouponCategoryModel
-/**
- * Model CouponRedemption
- * 
- */
-export type CouponRedemption = Prisma.CouponRedemptionModel
-/**
  * Model Cart
  * 
  */
@@ -122,3 +92,13 @@ export type OrderItem = Prisma.OrderItemModel
  * 
  */
 export type OrderStatusHistory = Prisma.OrderStatusHistoryModel
+/**
+ * Model Wishlist
+ * 
+ */
+export type Wishlist = Prisma.WishlistModel
+/**
+ * Model WishlistItem
+ * 
+ */
+export type WishlistItem = Prisma.WishlistItemModel

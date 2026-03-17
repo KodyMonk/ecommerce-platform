@@ -76,19 +76,23 @@ export default async function OrderPage({ params }: Props) {
           <h2 className="mb-4 text-lg font-semibold">Summary</h2>
 
           <div className="space-y-3 text-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Status</span>
-              <span>{order.status.replaceAll("_", " ")}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Payment</span>
-              <span>{order.paymentStatus.replaceAll("_", " ")}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Fulfillment</span>
-              <span>{order.fulfillmentStatus.replaceAll("_", " ")}</span>
-            </div>
-          </div>
+  <div className="flex items-center justify-between">
+    <span className="text-muted-foreground">Status</span>
+    <span>{order.status.replaceAll("_", " ")}</span>
+  </div>
+  <div className="flex items-center justify-between">
+    <span className="text-muted-foreground">Payment Status</span>
+    <span>{order.paymentStatus.replaceAll("_", " ")}</span>
+  </div>
+  <div className="flex items-center justify-between">
+    <span className="text-muted-foreground">Payment Method</span>
+    <span>{order.paymentMethod.replaceAll("_", " ")}</span>
+  </div>
+  <div className="flex items-center justify-between">
+    <span className="text-muted-foreground">Fulfillment</span>
+    <span>{order.fulfillmentStatus.replaceAll("_", " ")}</span>
+  </div>
+</div>
 
           <div className="my-5 border-t" />
 

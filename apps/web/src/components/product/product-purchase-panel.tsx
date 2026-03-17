@@ -10,6 +10,7 @@ import AddToCartButton from "@/components/product/add-to-cart-button";
 
 type Props = {
   product: ProductDTO;
+  actions?: React.ReactNode;
 };
 
 type VariantOptionGroup = {
@@ -17,9 +18,11 @@ type VariantOptionGroup = {
   values: string[];
 };
 
-export default function ProductPurchasePanel({ product }: Props) {
+export default function ProductPurchasePanel({ product, actions }: Props) {
   const defaultVariant =
-    product.variants.find((variant) => variant.isDefault) || product.variants[0] || null;
+    product.variants.find((variant) => variant.isDefault) ||
+    product.variants[0] ||
+    null;
 
   const optionGroups = useMemo<VariantOptionGroup[]>(() => {
     const map = new Map<string, Set<string>>();
@@ -195,12 +198,15 @@ export default function ProductPurchasePanel({ product }: Props) {
       </div>
 
       <div className="space-y-3">
-        <AddToCartButton
-          productId={product.id}
-          variantId={selectedVariant?.id ?? null}
-          quantity={quantity}
-          disabled={!inStock}
-        />
+        <div className="flex items-center gap-3">
+          <AddToCartButton
+            productId={product.id}
+            variantId={selectedVariant?.id ?? null}
+            quantity={quantity}
+            disabled={!inStock}
+          />
+          {actions}
+        </div>
 
         <p className="text-xs text-muted-foreground">
           Items are added to your cart immediately.

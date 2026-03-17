@@ -211,7 +211,7 @@ export type ProductVariantValueScalarWhereWithAggregatesInput = {
 export type ProductVariantValueCreateInput = {
   id?: string
   variant: Prisma.ProductVariantCreateNestedOneWithoutValuesInput
-  optionValue: Prisma.ProductOptionValueCreateNestedOneWithoutVariantLinksInput
+  optionValue: Prisma.ProductOptionValueCreateNestedOneWithoutVariantsInput
 }
 
 export type ProductVariantValueUncheckedCreateInput = {
@@ -223,7 +223,7 @@ export type ProductVariantValueUncheckedCreateInput = {
 export type ProductVariantValueUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   variant?: Prisma.ProductVariantUpdateOneRequiredWithoutValuesNestedInput
-  optionValue?: Prisma.ProductOptionValueUpdateOneRequiredWithoutVariantLinksNestedInput
+  optionValue?: Prisma.ProductOptionValueUpdateOneRequiredWithoutVariantsNestedInput
 }
 
 export type ProductVariantValueUncheckedUpdateInput = {
@@ -412,7 +412,7 @@ export type ProductVariantValueScalarWhereInput = {
 
 export type ProductVariantValueCreateWithoutVariantInput = {
   id?: string
-  optionValue: Prisma.ProductOptionValueCreateNestedOneWithoutVariantLinksInput
+  optionValue: Prisma.ProductOptionValueCreateNestedOneWithoutVariantsInput
 }
 
 export type ProductVariantValueUncheckedCreateWithoutVariantInput = {
@@ -473,7 +473,7 @@ export type ProductVariantValueCreateManyVariantInput = {
 
 export type ProductVariantValueUpdateWithoutVariantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  optionValue?: Prisma.ProductOptionValueUpdateOneRequiredWithoutVariantLinksNestedInput
+  optionValue?: Prisma.ProductOptionValueUpdateOneRequiredWithoutVariantsNestedInput
 }
 
 export type ProductVariantValueUncheckedUpdateWithoutVariantInput = {

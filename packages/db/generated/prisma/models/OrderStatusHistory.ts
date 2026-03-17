@@ -31,9 +31,6 @@ export type OrderStatusHistoryMinAggregateOutputType = {
   paymentStatus: $Enums.PaymentStatus | null
   fulfillmentStatus: $Enums.FulfillmentStatus | null
   note: string | null
-  trackingNumber: string | null
-  shippingCarrier: string | null
-  updatedByUserId: string | null
   createdAt: Date | null
 }
 
@@ -44,9 +41,6 @@ export type OrderStatusHistoryMaxAggregateOutputType = {
   paymentStatus: $Enums.PaymentStatus | null
   fulfillmentStatus: $Enums.FulfillmentStatus | null
   note: string | null
-  trackingNumber: string | null
-  shippingCarrier: string | null
-  updatedByUserId: string | null
   createdAt: Date | null
 }
 
@@ -57,9 +51,6 @@ export type OrderStatusHistoryCountAggregateOutputType = {
   paymentStatus: number
   fulfillmentStatus: number
   note: number
-  trackingNumber: number
-  shippingCarrier: number
-  updatedByUserId: number
   createdAt: number
   _all: number
 }
@@ -72,9 +63,6 @@ export type OrderStatusHistoryMinAggregateInputType = {
   paymentStatus?: true
   fulfillmentStatus?: true
   note?: true
-  trackingNumber?: true
-  shippingCarrier?: true
-  updatedByUserId?: true
   createdAt?: true
 }
 
@@ -85,9 +73,6 @@ export type OrderStatusHistoryMaxAggregateInputType = {
   paymentStatus?: true
   fulfillmentStatus?: true
   note?: true
-  trackingNumber?: true
-  shippingCarrier?: true
-  updatedByUserId?: true
   createdAt?: true
 }
 
@@ -98,9 +83,6 @@ export type OrderStatusHistoryCountAggregateInputType = {
   paymentStatus?: true
   fulfillmentStatus?: true
   note?: true
-  trackingNumber?: true
-  shippingCarrier?: true
-  updatedByUserId?: true
   createdAt?: true
   _all?: true
 }
@@ -181,12 +163,9 @@ export type OrderStatusHistoryGroupByOutputType = {
   id: string
   orderId: string
   status: $Enums.OrderStatus
-  paymentStatus: $Enums.PaymentStatus | null
-  fulfillmentStatus: $Enums.FulfillmentStatus | null
+  paymentStatus: $Enums.PaymentStatus
+  fulfillmentStatus: $Enums.FulfillmentStatus
   note: string | null
-  trackingNumber: string | null
-  shippingCarrier: string | null
-  updatedByUserId: string | null
   createdAt: Date
   _count: OrderStatusHistoryCountAggregateOutputType | null
   _min: OrderStatusHistoryMinAggregateOutputType | null
@@ -215,30 +194,22 @@ export type OrderStatusHistoryWhereInput = {
   id?: Prisma.StringFilter<"OrderStatusHistory"> | string
   orderId?: Prisma.StringFilter<"OrderStatusHistory"> | string
   status?: Prisma.EnumOrderStatusFilter<"OrderStatusHistory"> | $Enums.OrderStatus
-  paymentStatus?: Prisma.EnumPaymentStatusNullableFilter<"OrderStatusHistory"> | $Enums.PaymentStatus | null
-  fulfillmentStatus?: Prisma.EnumFulfillmentStatusNullableFilter<"OrderStatusHistory"> | $Enums.FulfillmentStatus | null
+  paymentStatus?: Prisma.EnumPaymentStatusFilter<"OrderStatusHistory"> | $Enums.PaymentStatus
+  fulfillmentStatus?: Prisma.EnumFulfillmentStatusFilter<"OrderStatusHistory"> | $Enums.FulfillmentStatus
   note?: Prisma.StringNullableFilter<"OrderStatusHistory"> | string | null
-  trackingNumber?: Prisma.StringNullableFilter<"OrderStatusHistory"> | string | null
-  shippingCarrier?: Prisma.StringNullableFilter<"OrderStatusHistory"> | string | null
-  updatedByUserId?: Prisma.StringNullableFilter<"OrderStatusHistory"> | string | null
   createdAt?: Prisma.DateTimeFilter<"OrderStatusHistory"> | Date | string
   order?: Prisma.XOR<Prisma.OrderScalarRelationFilter, Prisma.OrderWhereInput>
-  updatedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }
 
 export type OrderStatusHistoryOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   orderId?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  paymentStatus?: Prisma.SortOrderInput | Prisma.SortOrder
-  fulfillmentStatus?: Prisma.SortOrderInput | Prisma.SortOrder
+  paymentStatus?: Prisma.SortOrder
+  fulfillmentStatus?: Prisma.SortOrder
   note?: Prisma.SortOrderInput | Prisma.SortOrder
-  trackingNumber?: Prisma.SortOrderInput | Prisma.SortOrder
-  shippingCarrier?: Prisma.SortOrderInput | Prisma.SortOrder
-  updatedByUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   order?: Prisma.OrderOrderByWithRelationInput
-  updatedBy?: Prisma.UserOrderByWithRelationInput
 }
 
 export type OrderStatusHistoryWhereUniqueInput = Prisma.AtLeast<{
@@ -248,27 +219,20 @@ export type OrderStatusHistoryWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.OrderStatusHistoryWhereInput | Prisma.OrderStatusHistoryWhereInput[]
   orderId?: Prisma.StringFilter<"OrderStatusHistory"> | string
   status?: Prisma.EnumOrderStatusFilter<"OrderStatusHistory"> | $Enums.OrderStatus
-  paymentStatus?: Prisma.EnumPaymentStatusNullableFilter<"OrderStatusHistory"> | $Enums.PaymentStatus | null
-  fulfillmentStatus?: Prisma.EnumFulfillmentStatusNullableFilter<"OrderStatusHistory"> | $Enums.FulfillmentStatus | null
+  paymentStatus?: Prisma.EnumPaymentStatusFilter<"OrderStatusHistory"> | $Enums.PaymentStatus
+  fulfillmentStatus?: Prisma.EnumFulfillmentStatusFilter<"OrderStatusHistory"> | $Enums.FulfillmentStatus
   note?: Prisma.StringNullableFilter<"OrderStatusHistory"> | string | null
-  trackingNumber?: Prisma.StringNullableFilter<"OrderStatusHistory"> | string | null
-  shippingCarrier?: Prisma.StringNullableFilter<"OrderStatusHistory"> | string | null
-  updatedByUserId?: Prisma.StringNullableFilter<"OrderStatusHistory"> | string | null
   createdAt?: Prisma.DateTimeFilter<"OrderStatusHistory"> | Date | string
   order?: Prisma.XOR<Prisma.OrderScalarRelationFilter, Prisma.OrderWhereInput>
-  updatedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }, "id">
 
 export type OrderStatusHistoryOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   orderId?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  paymentStatus?: Prisma.SortOrderInput | Prisma.SortOrder
-  fulfillmentStatus?: Prisma.SortOrderInput | Prisma.SortOrder
+  paymentStatus?: Prisma.SortOrder
+  fulfillmentStatus?: Prisma.SortOrder
   note?: Prisma.SortOrderInput | Prisma.SortOrder
-  trackingNumber?: Prisma.SortOrderInput | Prisma.SortOrder
-  shippingCarrier?: Prisma.SortOrderInput | Prisma.SortOrder
-  updatedByUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.OrderStatusHistoryCountOrderByAggregateInput
   _max?: Prisma.OrderStatusHistoryMaxOrderByAggregateInput
@@ -282,64 +246,49 @@ export type OrderStatusHistoryScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"OrderStatusHistory"> | string
   orderId?: Prisma.StringWithAggregatesFilter<"OrderStatusHistory"> | string
   status?: Prisma.EnumOrderStatusWithAggregatesFilter<"OrderStatusHistory"> | $Enums.OrderStatus
-  paymentStatus?: Prisma.EnumPaymentStatusNullableWithAggregatesFilter<"OrderStatusHistory"> | $Enums.PaymentStatus | null
-  fulfillmentStatus?: Prisma.EnumFulfillmentStatusNullableWithAggregatesFilter<"OrderStatusHistory"> | $Enums.FulfillmentStatus | null
+  paymentStatus?: Prisma.EnumPaymentStatusWithAggregatesFilter<"OrderStatusHistory"> | $Enums.PaymentStatus
+  fulfillmentStatus?: Prisma.EnumFulfillmentStatusWithAggregatesFilter<"OrderStatusHistory"> | $Enums.FulfillmentStatus
   note?: Prisma.StringNullableWithAggregatesFilter<"OrderStatusHistory"> | string | null
-  trackingNumber?: Prisma.StringNullableWithAggregatesFilter<"OrderStatusHistory"> | string | null
-  shippingCarrier?: Prisma.StringNullableWithAggregatesFilter<"OrderStatusHistory"> | string | null
-  updatedByUserId?: Prisma.StringNullableWithAggregatesFilter<"OrderStatusHistory"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"OrderStatusHistory"> | Date | string
 }
 
 export type OrderStatusHistoryCreateInput = {
   id?: string
   status: $Enums.OrderStatus
-  paymentStatus?: $Enums.PaymentStatus | null
-  fulfillmentStatus?: $Enums.FulfillmentStatus | null
+  paymentStatus: $Enums.PaymentStatus
+  fulfillmentStatus: $Enums.FulfillmentStatus
   note?: string | null
-  trackingNumber?: string | null
-  shippingCarrier?: string | null
   createdAt?: Date | string
   order: Prisma.OrderCreateNestedOneWithoutStatusHistoryInput
-  updatedBy?: Prisma.UserCreateNestedOneWithoutOrderStatusLogsInput
 }
 
 export type OrderStatusHistoryUncheckedCreateInput = {
   id?: string
   orderId: string
   status: $Enums.OrderStatus
-  paymentStatus?: $Enums.PaymentStatus | null
-  fulfillmentStatus?: $Enums.FulfillmentStatus | null
+  paymentStatus: $Enums.PaymentStatus
+  fulfillmentStatus: $Enums.FulfillmentStatus
   note?: string | null
-  trackingNumber?: string | null
-  shippingCarrier?: string | null
-  updatedByUserId?: string | null
   createdAt?: Date | string
 }
 
 export type OrderStatusHistoryUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
-  paymentStatus?: Prisma.NullableEnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus | null
-  fulfillmentStatus?: Prisma.NullableEnumFulfillmentStatusFieldUpdateOperationsInput | $Enums.FulfillmentStatus | null
+  paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+  fulfillmentStatus?: Prisma.EnumFulfillmentStatusFieldUpdateOperationsInput | $Enums.FulfillmentStatus
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  shippingCarrier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order?: Prisma.OrderUpdateOneRequiredWithoutStatusHistoryNestedInput
-  updatedBy?: Prisma.UserUpdateOneWithoutOrderStatusLogsNestedInput
 }
 
 export type OrderStatusHistoryUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   orderId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
-  paymentStatus?: Prisma.NullableEnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus | null
-  fulfillmentStatus?: Prisma.NullableEnumFulfillmentStatusFieldUpdateOperationsInput | $Enums.FulfillmentStatus | null
+  paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+  fulfillmentStatus?: Prisma.EnumFulfillmentStatusFieldUpdateOperationsInput | $Enums.FulfillmentStatus
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  shippingCarrier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  updatedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -347,23 +296,18 @@ export type OrderStatusHistoryCreateManyInput = {
   id?: string
   orderId: string
   status: $Enums.OrderStatus
-  paymentStatus?: $Enums.PaymentStatus | null
-  fulfillmentStatus?: $Enums.FulfillmentStatus | null
+  paymentStatus: $Enums.PaymentStatus
+  fulfillmentStatus: $Enums.FulfillmentStatus
   note?: string | null
-  trackingNumber?: string | null
-  shippingCarrier?: string | null
-  updatedByUserId?: string | null
   createdAt?: Date | string
 }
 
 export type OrderStatusHistoryUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
-  paymentStatus?: Prisma.NullableEnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus | null
-  fulfillmentStatus?: Prisma.NullableEnumFulfillmentStatusFieldUpdateOperationsInput | $Enums.FulfillmentStatus | null
+  paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+  fulfillmentStatus?: Prisma.EnumFulfillmentStatusFieldUpdateOperationsInput | $Enums.FulfillmentStatus
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  shippingCarrier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -371,12 +315,9 @@ export type OrderStatusHistoryUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   orderId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
-  paymentStatus?: Prisma.NullableEnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus | null
-  fulfillmentStatus?: Prisma.NullableEnumFulfillmentStatusFieldUpdateOperationsInput | $Enums.FulfillmentStatus | null
+  paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+  fulfillmentStatus?: Prisma.EnumFulfillmentStatusFieldUpdateOperationsInput | $Enums.FulfillmentStatus
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  shippingCarrier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  updatedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -397,9 +338,6 @@ export type OrderStatusHistoryCountOrderByAggregateInput = {
   paymentStatus?: Prisma.SortOrder
   fulfillmentStatus?: Prisma.SortOrder
   note?: Prisma.SortOrder
-  trackingNumber?: Prisma.SortOrder
-  shippingCarrier?: Prisma.SortOrder
-  updatedByUserId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -410,9 +348,6 @@ export type OrderStatusHistoryMaxOrderByAggregateInput = {
   paymentStatus?: Prisma.SortOrder
   fulfillmentStatus?: Prisma.SortOrder
   note?: Prisma.SortOrder
-  trackingNumber?: Prisma.SortOrder
-  shippingCarrier?: Prisma.SortOrder
-  updatedByUserId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -423,52 +358,7 @@ export type OrderStatusHistoryMinOrderByAggregateInput = {
   paymentStatus?: Prisma.SortOrder
   fulfillmentStatus?: Prisma.SortOrder
   note?: Prisma.SortOrder
-  trackingNumber?: Prisma.SortOrder
-  shippingCarrier?: Prisma.SortOrder
-  updatedByUserId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
-}
-
-export type OrderStatusHistoryCreateNestedManyWithoutUpdatedByInput = {
-  create?: Prisma.XOR<Prisma.OrderStatusHistoryCreateWithoutUpdatedByInput, Prisma.OrderStatusHistoryUncheckedCreateWithoutUpdatedByInput> | Prisma.OrderStatusHistoryCreateWithoutUpdatedByInput[] | Prisma.OrderStatusHistoryUncheckedCreateWithoutUpdatedByInput[]
-  connectOrCreate?: Prisma.OrderStatusHistoryCreateOrConnectWithoutUpdatedByInput | Prisma.OrderStatusHistoryCreateOrConnectWithoutUpdatedByInput[]
-  createMany?: Prisma.OrderStatusHistoryCreateManyUpdatedByInputEnvelope
-  connect?: Prisma.OrderStatusHistoryWhereUniqueInput | Prisma.OrderStatusHistoryWhereUniqueInput[]
-}
-
-export type OrderStatusHistoryUncheckedCreateNestedManyWithoutUpdatedByInput = {
-  create?: Prisma.XOR<Prisma.OrderStatusHistoryCreateWithoutUpdatedByInput, Prisma.OrderStatusHistoryUncheckedCreateWithoutUpdatedByInput> | Prisma.OrderStatusHistoryCreateWithoutUpdatedByInput[] | Prisma.OrderStatusHistoryUncheckedCreateWithoutUpdatedByInput[]
-  connectOrCreate?: Prisma.OrderStatusHistoryCreateOrConnectWithoutUpdatedByInput | Prisma.OrderStatusHistoryCreateOrConnectWithoutUpdatedByInput[]
-  createMany?: Prisma.OrderStatusHistoryCreateManyUpdatedByInputEnvelope
-  connect?: Prisma.OrderStatusHistoryWhereUniqueInput | Prisma.OrderStatusHistoryWhereUniqueInput[]
-}
-
-export type OrderStatusHistoryUpdateManyWithoutUpdatedByNestedInput = {
-  create?: Prisma.XOR<Prisma.OrderStatusHistoryCreateWithoutUpdatedByInput, Prisma.OrderStatusHistoryUncheckedCreateWithoutUpdatedByInput> | Prisma.OrderStatusHistoryCreateWithoutUpdatedByInput[] | Prisma.OrderStatusHistoryUncheckedCreateWithoutUpdatedByInput[]
-  connectOrCreate?: Prisma.OrderStatusHistoryCreateOrConnectWithoutUpdatedByInput | Prisma.OrderStatusHistoryCreateOrConnectWithoutUpdatedByInput[]
-  upsert?: Prisma.OrderStatusHistoryUpsertWithWhereUniqueWithoutUpdatedByInput | Prisma.OrderStatusHistoryUpsertWithWhereUniqueWithoutUpdatedByInput[]
-  createMany?: Prisma.OrderStatusHistoryCreateManyUpdatedByInputEnvelope
-  set?: Prisma.OrderStatusHistoryWhereUniqueInput | Prisma.OrderStatusHistoryWhereUniqueInput[]
-  disconnect?: Prisma.OrderStatusHistoryWhereUniqueInput | Prisma.OrderStatusHistoryWhereUniqueInput[]
-  delete?: Prisma.OrderStatusHistoryWhereUniqueInput | Prisma.OrderStatusHistoryWhereUniqueInput[]
-  connect?: Prisma.OrderStatusHistoryWhereUniqueInput | Prisma.OrderStatusHistoryWhereUniqueInput[]
-  update?: Prisma.OrderStatusHistoryUpdateWithWhereUniqueWithoutUpdatedByInput | Prisma.OrderStatusHistoryUpdateWithWhereUniqueWithoutUpdatedByInput[]
-  updateMany?: Prisma.OrderStatusHistoryUpdateManyWithWhereWithoutUpdatedByInput | Prisma.OrderStatusHistoryUpdateManyWithWhereWithoutUpdatedByInput[]
-  deleteMany?: Prisma.OrderStatusHistoryScalarWhereInput | Prisma.OrderStatusHistoryScalarWhereInput[]
-}
-
-export type OrderStatusHistoryUncheckedUpdateManyWithoutUpdatedByNestedInput = {
-  create?: Prisma.XOR<Prisma.OrderStatusHistoryCreateWithoutUpdatedByInput, Prisma.OrderStatusHistoryUncheckedCreateWithoutUpdatedByInput> | Prisma.OrderStatusHistoryCreateWithoutUpdatedByInput[] | Prisma.OrderStatusHistoryUncheckedCreateWithoutUpdatedByInput[]
-  connectOrCreate?: Prisma.OrderStatusHistoryCreateOrConnectWithoutUpdatedByInput | Prisma.OrderStatusHistoryCreateOrConnectWithoutUpdatedByInput[]
-  upsert?: Prisma.OrderStatusHistoryUpsertWithWhereUniqueWithoutUpdatedByInput | Prisma.OrderStatusHistoryUpsertWithWhereUniqueWithoutUpdatedByInput[]
-  createMany?: Prisma.OrderStatusHistoryCreateManyUpdatedByInputEnvelope
-  set?: Prisma.OrderStatusHistoryWhereUniqueInput | Prisma.OrderStatusHistoryWhereUniqueInput[]
-  disconnect?: Prisma.OrderStatusHistoryWhereUniqueInput | Prisma.OrderStatusHistoryWhereUniqueInput[]
-  delete?: Prisma.OrderStatusHistoryWhereUniqueInput | Prisma.OrderStatusHistoryWhereUniqueInput[]
-  connect?: Prisma.OrderStatusHistoryWhereUniqueInput | Prisma.OrderStatusHistoryWhereUniqueInput[]
-  update?: Prisma.OrderStatusHistoryUpdateWithWhereUniqueWithoutUpdatedByInput | Prisma.OrderStatusHistoryUpdateWithWhereUniqueWithoutUpdatedByInput[]
-  updateMany?: Prisma.OrderStatusHistoryUpdateManyWithWhereWithoutUpdatedByInput | Prisma.OrderStatusHistoryUpdateManyWithWhereWithoutUpdatedByInput[]
-  deleteMany?: Prisma.OrderStatusHistoryScalarWhereInput | Prisma.OrderStatusHistoryScalarWhereInput[]
 }
 
 export type OrderStatusHistoryCreateNestedManyWithoutOrderInput = {
@@ -513,101 +403,21 @@ export type OrderStatusHistoryUncheckedUpdateManyWithoutOrderNestedInput = {
   deleteMany?: Prisma.OrderStatusHistoryScalarWhereInput | Prisma.OrderStatusHistoryScalarWhereInput[]
 }
 
-export type NullableEnumPaymentStatusFieldUpdateOperationsInput = {
-  set?: $Enums.PaymentStatus | null
-}
-
-export type NullableEnumFulfillmentStatusFieldUpdateOperationsInput = {
-  set?: $Enums.FulfillmentStatus | null
-}
-
-export type OrderStatusHistoryCreateWithoutUpdatedByInput = {
-  id?: string
-  status: $Enums.OrderStatus
-  paymentStatus?: $Enums.PaymentStatus | null
-  fulfillmentStatus?: $Enums.FulfillmentStatus | null
-  note?: string | null
-  trackingNumber?: string | null
-  shippingCarrier?: string | null
-  createdAt?: Date | string
-  order: Prisma.OrderCreateNestedOneWithoutStatusHistoryInput
-}
-
-export type OrderStatusHistoryUncheckedCreateWithoutUpdatedByInput = {
-  id?: string
-  orderId: string
-  status: $Enums.OrderStatus
-  paymentStatus?: $Enums.PaymentStatus | null
-  fulfillmentStatus?: $Enums.FulfillmentStatus | null
-  note?: string | null
-  trackingNumber?: string | null
-  shippingCarrier?: string | null
-  createdAt?: Date | string
-}
-
-export type OrderStatusHistoryCreateOrConnectWithoutUpdatedByInput = {
-  where: Prisma.OrderStatusHistoryWhereUniqueInput
-  create: Prisma.XOR<Prisma.OrderStatusHistoryCreateWithoutUpdatedByInput, Prisma.OrderStatusHistoryUncheckedCreateWithoutUpdatedByInput>
-}
-
-export type OrderStatusHistoryCreateManyUpdatedByInputEnvelope = {
-  data: Prisma.OrderStatusHistoryCreateManyUpdatedByInput | Prisma.OrderStatusHistoryCreateManyUpdatedByInput[]
-  skipDuplicates?: boolean
-}
-
-export type OrderStatusHistoryUpsertWithWhereUniqueWithoutUpdatedByInput = {
-  where: Prisma.OrderStatusHistoryWhereUniqueInput
-  update: Prisma.XOR<Prisma.OrderStatusHistoryUpdateWithoutUpdatedByInput, Prisma.OrderStatusHistoryUncheckedUpdateWithoutUpdatedByInput>
-  create: Prisma.XOR<Prisma.OrderStatusHistoryCreateWithoutUpdatedByInput, Prisma.OrderStatusHistoryUncheckedCreateWithoutUpdatedByInput>
-}
-
-export type OrderStatusHistoryUpdateWithWhereUniqueWithoutUpdatedByInput = {
-  where: Prisma.OrderStatusHistoryWhereUniqueInput
-  data: Prisma.XOR<Prisma.OrderStatusHistoryUpdateWithoutUpdatedByInput, Prisma.OrderStatusHistoryUncheckedUpdateWithoutUpdatedByInput>
-}
-
-export type OrderStatusHistoryUpdateManyWithWhereWithoutUpdatedByInput = {
-  where: Prisma.OrderStatusHistoryScalarWhereInput
-  data: Prisma.XOR<Prisma.OrderStatusHistoryUpdateManyMutationInput, Prisma.OrderStatusHistoryUncheckedUpdateManyWithoutUpdatedByInput>
-}
-
-export type OrderStatusHistoryScalarWhereInput = {
-  AND?: Prisma.OrderStatusHistoryScalarWhereInput | Prisma.OrderStatusHistoryScalarWhereInput[]
-  OR?: Prisma.OrderStatusHistoryScalarWhereInput[]
-  NOT?: Prisma.OrderStatusHistoryScalarWhereInput | Prisma.OrderStatusHistoryScalarWhereInput[]
-  id?: Prisma.StringFilter<"OrderStatusHistory"> | string
-  orderId?: Prisma.StringFilter<"OrderStatusHistory"> | string
-  status?: Prisma.EnumOrderStatusFilter<"OrderStatusHistory"> | $Enums.OrderStatus
-  paymentStatus?: Prisma.EnumPaymentStatusNullableFilter<"OrderStatusHistory"> | $Enums.PaymentStatus | null
-  fulfillmentStatus?: Prisma.EnumFulfillmentStatusNullableFilter<"OrderStatusHistory"> | $Enums.FulfillmentStatus | null
-  note?: Prisma.StringNullableFilter<"OrderStatusHistory"> | string | null
-  trackingNumber?: Prisma.StringNullableFilter<"OrderStatusHistory"> | string | null
-  shippingCarrier?: Prisma.StringNullableFilter<"OrderStatusHistory"> | string | null
-  updatedByUserId?: Prisma.StringNullableFilter<"OrderStatusHistory"> | string | null
-  createdAt?: Prisma.DateTimeFilter<"OrderStatusHistory"> | Date | string
-}
-
 export type OrderStatusHistoryCreateWithoutOrderInput = {
   id?: string
   status: $Enums.OrderStatus
-  paymentStatus?: $Enums.PaymentStatus | null
-  fulfillmentStatus?: $Enums.FulfillmentStatus | null
+  paymentStatus: $Enums.PaymentStatus
+  fulfillmentStatus: $Enums.FulfillmentStatus
   note?: string | null
-  trackingNumber?: string | null
-  shippingCarrier?: string | null
   createdAt?: Date | string
-  updatedBy?: Prisma.UserCreateNestedOneWithoutOrderStatusLogsInput
 }
 
 export type OrderStatusHistoryUncheckedCreateWithoutOrderInput = {
   id?: string
   status: $Enums.OrderStatus
-  paymentStatus?: $Enums.PaymentStatus | null
-  fulfillmentStatus?: $Enums.FulfillmentStatus | null
+  paymentStatus: $Enums.PaymentStatus
+  fulfillmentStatus: $Enums.FulfillmentStatus
   note?: string | null
-  trackingNumber?: string | null
-  shippingCarrier?: string | null
-  updatedByUserId?: string | null
   createdAt?: Date | string
 }
 
@@ -637,99 +447,52 @@ export type OrderStatusHistoryUpdateManyWithWhereWithoutOrderInput = {
   data: Prisma.XOR<Prisma.OrderStatusHistoryUpdateManyMutationInput, Prisma.OrderStatusHistoryUncheckedUpdateManyWithoutOrderInput>
 }
 
-export type OrderStatusHistoryCreateManyUpdatedByInput = {
-  id?: string
-  orderId: string
-  status: $Enums.OrderStatus
-  paymentStatus?: $Enums.PaymentStatus | null
-  fulfillmentStatus?: $Enums.FulfillmentStatus | null
-  note?: string | null
-  trackingNumber?: string | null
-  shippingCarrier?: string | null
-  createdAt?: Date | string
-}
-
-export type OrderStatusHistoryUpdateWithoutUpdatedByInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
-  paymentStatus?: Prisma.NullableEnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus | null
-  fulfillmentStatus?: Prisma.NullableEnumFulfillmentStatusFieldUpdateOperationsInput | $Enums.FulfillmentStatus | null
-  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  shippingCarrier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  order?: Prisma.OrderUpdateOneRequiredWithoutStatusHistoryNestedInput
-}
-
-export type OrderStatusHistoryUncheckedUpdateWithoutUpdatedByInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  orderId?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
-  paymentStatus?: Prisma.NullableEnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus | null
-  fulfillmentStatus?: Prisma.NullableEnumFulfillmentStatusFieldUpdateOperationsInput | $Enums.FulfillmentStatus | null
-  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  shippingCarrier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-}
-
-export type OrderStatusHistoryUncheckedUpdateManyWithoutUpdatedByInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  orderId?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
-  paymentStatus?: Prisma.NullableEnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus | null
-  fulfillmentStatus?: Prisma.NullableEnumFulfillmentStatusFieldUpdateOperationsInput | $Enums.FulfillmentStatus | null
-  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  shippingCarrier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+export type OrderStatusHistoryScalarWhereInput = {
+  AND?: Prisma.OrderStatusHistoryScalarWhereInput | Prisma.OrderStatusHistoryScalarWhereInput[]
+  OR?: Prisma.OrderStatusHistoryScalarWhereInput[]
+  NOT?: Prisma.OrderStatusHistoryScalarWhereInput | Prisma.OrderStatusHistoryScalarWhereInput[]
+  id?: Prisma.StringFilter<"OrderStatusHistory"> | string
+  orderId?: Prisma.StringFilter<"OrderStatusHistory"> | string
+  status?: Prisma.EnumOrderStatusFilter<"OrderStatusHistory"> | $Enums.OrderStatus
+  paymentStatus?: Prisma.EnumPaymentStatusFilter<"OrderStatusHistory"> | $Enums.PaymentStatus
+  fulfillmentStatus?: Prisma.EnumFulfillmentStatusFilter<"OrderStatusHistory"> | $Enums.FulfillmentStatus
+  note?: Prisma.StringNullableFilter<"OrderStatusHistory"> | string | null
+  createdAt?: Prisma.DateTimeFilter<"OrderStatusHistory"> | Date | string
 }
 
 export type OrderStatusHistoryCreateManyOrderInput = {
   id?: string
   status: $Enums.OrderStatus
-  paymentStatus?: $Enums.PaymentStatus | null
-  fulfillmentStatus?: $Enums.FulfillmentStatus | null
+  paymentStatus: $Enums.PaymentStatus
+  fulfillmentStatus: $Enums.FulfillmentStatus
   note?: string | null
-  trackingNumber?: string | null
-  shippingCarrier?: string | null
-  updatedByUserId?: string | null
   createdAt?: Date | string
 }
 
 export type OrderStatusHistoryUpdateWithoutOrderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
-  paymentStatus?: Prisma.NullableEnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus | null
-  fulfillmentStatus?: Prisma.NullableEnumFulfillmentStatusFieldUpdateOperationsInput | $Enums.FulfillmentStatus | null
+  paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+  fulfillmentStatus?: Prisma.EnumFulfillmentStatusFieldUpdateOperationsInput | $Enums.FulfillmentStatus
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  shippingCarrier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedBy?: Prisma.UserUpdateOneWithoutOrderStatusLogsNestedInput
 }
 
 export type OrderStatusHistoryUncheckedUpdateWithoutOrderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
-  paymentStatus?: Prisma.NullableEnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus | null
-  fulfillmentStatus?: Prisma.NullableEnumFulfillmentStatusFieldUpdateOperationsInput | $Enums.FulfillmentStatus | null
+  paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+  fulfillmentStatus?: Prisma.EnumFulfillmentStatusFieldUpdateOperationsInput | $Enums.FulfillmentStatus
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  shippingCarrier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  updatedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type OrderStatusHistoryUncheckedUpdateManyWithoutOrderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
-  paymentStatus?: Prisma.NullableEnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus | null
-  fulfillmentStatus?: Prisma.NullableEnumFulfillmentStatusFieldUpdateOperationsInput | $Enums.FulfillmentStatus | null
+  paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+  fulfillmentStatus?: Prisma.EnumFulfillmentStatusFieldUpdateOperationsInput | $Enums.FulfillmentStatus
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  shippingCarrier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  updatedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -742,12 +505,8 @@ export type OrderStatusHistorySelect<ExtArgs extends runtime.Types.Extensions.In
   paymentStatus?: boolean
   fulfillmentStatus?: boolean
   note?: boolean
-  trackingNumber?: boolean
-  shippingCarrier?: boolean
-  updatedByUserId?: boolean
   createdAt?: boolean
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
-  updatedBy?: boolean | Prisma.OrderStatusHistory$updatedByArgs<ExtArgs>
 }, ExtArgs["result"]["orderStatusHistory"]>
 
 export type OrderStatusHistorySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -757,12 +516,8 @@ export type OrderStatusHistorySelectCreateManyAndReturn<ExtArgs extends runtime.
   paymentStatus?: boolean
   fulfillmentStatus?: boolean
   note?: boolean
-  trackingNumber?: boolean
-  shippingCarrier?: boolean
-  updatedByUserId?: boolean
   createdAt?: boolean
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
-  updatedBy?: boolean | Prisma.OrderStatusHistory$updatedByArgs<ExtArgs>
 }, ExtArgs["result"]["orderStatusHistory"]>
 
 export type OrderStatusHistorySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -772,12 +527,8 @@ export type OrderStatusHistorySelectUpdateManyAndReturn<ExtArgs extends runtime.
   paymentStatus?: boolean
   fulfillmentStatus?: boolean
   note?: boolean
-  trackingNumber?: boolean
-  shippingCarrier?: boolean
-  updatedByUserId?: boolean
   createdAt?: boolean
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
-  updatedBy?: boolean | Prisma.OrderStatusHistory$updatedByArgs<ExtArgs>
 }, ExtArgs["result"]["orderStatusHistory"]>
 
 export type OrderStatusHistorySelectScalar = {
@@ -787,42 +538,32 @@ export type OrderStatusHistorySelectScalar = {
   paymentStatus?: boolean
   fulfillmentStatus?: boolean
   note?: boolean
-  trackingNumber?: boolean
-  shippingCarrier?: boolean
-  updatedByUserId?: boolean
   createdAt?: boolean
 }
 
-export type OrderStatusHistoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "orderId" | "status" | "paymentStatus" | "fulfillmentStatus" | "note" | "trackingNumber" | "shippingCarrier" | "updatedByUserId" | "createdAt", ExtArgs["result"]["orderStatusHistory"]>
+export type OrderStatusHistoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "orderId" | "status" | "paymentStatus" | "fulfillmentStatus" | "note" | "createdAt", ExtArgs["result"]["orderStatusHistory"]>
 export type OrderStatusHistoryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
-  updatedBy?: boolean | Prisma.OrderStatusHistory$updatedByArgs<ExtArgs>
 }
 export type OrderStatusHistoryIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
-  updatedBy?: boolean | Prisma.OrderStatusHistory$updatedByArgs<ExtArgs>
 }
 export type OrderStatusHistoryIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
-  updatedBy?: boolean | Prisma.OrderStatusHistory$updatedByArgs<ExtArgs>
 }
 
 export type $OrderStatusHistoryPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "OrderStatusHistory"
   objects: {
     order: Prisma.$OrderPayload<ExtArgs>
-    updatedBy: Prisma.$UserPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     orderId: string
     status: $Enums.OrderStatus
-    paymentStatus: $Enums.PaymentStatus | null
-    fulfillmentStatus: $Enums.FulfillmentStatus | null
+    paymentStatus: $Enums.PaymentStatus
+    fulfillmentStatus: $Enums.FulfillmentStatus
     note: string | null
-    trackingNumber: string | null
-    shippingCarrier: string | null
-    updatedByUserId: string | null
     createdAt: Date
   }, ExtArgs["result"]["orderStatusHistory"]>
   composites: {}
@@ -1219,7 +960,6 @@ readonly fields: OrderStatusHistoryFieldRefs;
 export interface Prisma__OrderStatusHistoryClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   order<T extends Prisma.OrderDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrderDefaultArgs<ExtArgs>>): Prisma.Prisma__OrderClient<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  updatedBy<T extends Prisma.OrderStatusHistory$updatedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrderStatusHistory$updatedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1255,9 +995,6 @@ export interface OrderStatusHistoryFieldRefs {
   readonly paymentStatus: Prisma.FieldRef<"OrderStatusHistory", 'PaymentStatus'>
   readonly fulfillmentStatus: Prisma.FieldRef<"OrderStatusHistory", 'FulfillmentStatus'>
   readonly note: Prisma.FieldRef<"OrderStatusHistory", 'String'>
-  readonly trackingNumber: Prisma.FieldRef<"OrderStatusHistory", 'String'>
-  readonly shippingCarrier: Prisma.FieldRef<"OrderStatusHistory", 'String'>
-  readonly updatedByUserId: Prisma.FieldRef<"OrderStatusHistory", 'String'>
   readonly createdAt: Prisma.FieldRef<"OrderStatusHistory", 'DateTime'>
 }
     
@@ -1657,25 +1394,6 @@ export type OrderStatusHistoryDeleteManyArgs<ExtArgs extends runtime.Types.Exten
    * Limit how many OrderStatusHistories to delete.
    */
   limit?: number
-}
-
-/**
- * OrderStatusHistory.updatedBy
- */
-export type OrderStatusHistory$updatedByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the User
-   */
-  select?: Prisma.UserSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the User
-   */
-  omit?: Prisma.UserOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.UserInclude<ExtArgs> | null
-  where?: Prisma.UserWhereInput
 }
 
 /**

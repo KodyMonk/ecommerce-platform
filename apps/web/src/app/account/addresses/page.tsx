@@ -1,0 +1,81 @@
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
+import Breadcrumbs from "@/components/layout/breadcrumbs";
+import AddressForm from "@/components/account/address-form";
+import { getSavedAddressesForCurrentUser } from "@/lib/addresses";
+
+export const metadata = {
+  title: "Saved Addresses",
+  description: "Manage saved addresses",
+};
+
+export default async function AccountAddressesPage() {
+  const session = await auth();
+
+  if (!session?.user) {
+    redirect("/login?callbackUrl=/account/addresses");
+  }
+
+  const addresses = await getSavedAddressesForCurrentUser();
+
+  return (
+    <main className="container mx-auto px-6 py-10">
+      <Breadcrumbs
+        items={[
+          { label: "Home", href: "/" },
+          { label: "Account", href: "/account" },
+          { label: "Addresses" },
+        ]}
+      />
+
+      <div className="mb-8">
+        <h1 className="text-3xl font-semibold">Saved Addresses</h1>
+        <p className="mt-2 text-muted-foreground">
+          Save shipping addresses for faster checkout.
+        </p>
+      </div>
+
+      <div className="grid gap-8 lg:grid-cols-[1fr_420px]">
+        <section className="space-y-4">
+          {addresses.length === 0 ? (
+            <div className="rounded-2xl border p-6 text-sm text-muted-foreground">
+              No saved addresses yet.
+            </div>
+          ) : (
+            addresses.map((address) => (
+              <div key={address.id} className="rounded-2xl border p-6">
+                <p className="font-medium">{address.fullName}</p>
+                {address.phone ? (
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {address.phone}
+                  </p>
+                ) : null}
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {address.line1}
+                </p>
+                {address.line2 ? (
+                  <p className="text-sm text-muted-foreground">
+                    {address.line2}
+                  </p>
+                ) : null}
+                <p className="text-sm text-muted-foreground">
+                  {address.city}
+                  {address.state ? `, ${address.state}` : ""}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {address.postalCode ? `${address.postalCode}, ` : ""}
+                  {address.country}
+                </p>
+              </div>
+            ))
+          )}
+        </section>
+
+        <aside className="rounded-2xl border p-6">
+          <h2 className="mb-4 text-xl font-semibold">Add Address</h2>
+          <AddressForm />
+        </aside>
+      </div>
+    </main>
+  );
+}

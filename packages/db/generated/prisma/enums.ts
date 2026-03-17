@@ -10,8 +10,8 @@
 */
 
 export const UserRole = {
-  CUSTOMER: 'CUSTOMER',
-  ADMIN: 'ADMIN'
+  ADMIN: 'ADMIN',
+  CUSTOMER: 'CUSTOMER'
 } as const
 
 export type UserRole = (typeof UserRole)[keyof typeof UserRole]
@@ -25,42 +25,10 @@ export const AddressType = {
 export type AddressType = (typeof AddressType)[keyof typeof AddressType]
 
 
-export const WeightUnit = {
-  G: 'G',
-  KG: 'KG',
-  LB: 'LB'
-} as const
-
-export type WeightUnit = (typeof WeightUnit)[keyof typeof WeightUnit]
-
-
-export const DimensionUnit = {
-  CM: 'CM',
-  IN: 'IN'
-} as const
-
-export type DimensionUnit = (typeof DimensionUnit)[keyof typeof DimensionUnit]
-
-
-export const DiscountType = {
-  PERCENTAGE: 'PERCENTAGE',
-  FIXED: 'FIXED'
-} as const
-
-export type DiscountType = (typeof DiscountType)[keyof typeof DiscountType]
-
-
 export const OrderStatus = {
   PENDING: 'PENDING',
   CONFIRMED: 'CONFIRMED',
-  PROCESSING: 'PROCESSING',
-  PACKED: 'PACKED',
-  SHIPPED: 'SHIPPED',
-  OUT_FOR_DELIVERY: 'OUT_FOR_DELIVERY',
-  DELIVERED: 'DELIVERED',
-  CANCELLED: 'CANCELLED',
-  RETURNED: 'RETURNED',
-  REFUNDED: 'REFUNDED'
+  CANCELLED: 'CANCELLED'
 } as const
 
 export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus]
@@ -68,11 +36,8 @@ export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus]
 
 export const PaymentStatus = {
   PENDING: 'PENDING',
-  AUTHORIZED: 'AUTHORIZED',
   PAID: 'PAID',
-  FAILED: 'FAILED',
-  REFUNDED: 'REFUNDED',
-  PARTIALLY_REFUNDED: 'PARTIALLY_REFUNDED'
+  FAILED: 'FAILED'
 } as const
 
 export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus]
@@ -80,9 +45,17 @@ export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus]
 
 export const FulfillmentStatus = {
   UNFULFILLED: 'UNFULFILLED',
-  PARTIALLY_FULFILLED: 'PARTIALLY_FULFILLED',
-  FULFILLED: 'FULFILLED',
-  RETURNED: 'RETURNED'
+  SHIPPED: 'SHIPPED',
+  OUT_FOR_DELIVERY: 'OUT_FOR_DELIVERY',
+  DELIVERED: 'DELIVERED'
 } as const
 
 export type FulfillmentStatus = (typeof FulfillmentStatus)[keyof typeof FulfillmentStatus]
+
+
+export const PaymentMethod = {
+  COD: 'COD',
+  MANUAL: 'MANUAL'
+} as const
+
+export type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod]

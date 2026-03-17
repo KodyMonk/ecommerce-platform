@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { Button } from "@/components/ui/button";
 import Breadcrumbs from "@/components/layout/breadcrumbs";
 import { getOrdersForCurrentUser } from "@/lib/orders";
+import { getSavedAddressesForCurrentUser } from "@/lib/addresses";
 
 export const metadata = {
   title: "My Account",
@@ -17,7 +18,10 @@ export default async function AccountPage() {
     redirect("/login?callbackUrl=/account");
   }
 
-  const orders = await getOrdersForCurrentUser();
+  const [orders, addresses] = await Promise.all([
+    getOrdersForCurrentUser(),
+    getSavedAddressesForCurrentUser(),
+  ]);
 
   return (
     <main className="container mx-auto px-6 py-10">
@@ -31,7 +35,7 @@ export default async function AccountPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-semibold">My Account</h1>
         <p className="mt-2 text-muted-foreground">
-          Manage your profile and view your orders.
+          Manage your profile, addresses, and orders.
         </p>
       </div>
 
@@ -59,6 +63,11 @@ export default async function AccountPage() {
               <p className="text-muted-foreground">Orders</p>
               <p className="font-medium">{orders.length}</p>
             </div>
+
+            <div>
+              <p className="text-muted-foreground">Saved Addresses</p>
+              <p className="font-medium">{addresses.length}</p>
+            </div>
           </div>
         </section>
 
@@ -69,6 +78,18 @@ export default async function AccountPage() {
             <div className="flex flex-col gap-3">
               <Link href="/orders">
                 <Button className="w-full">My Orders</Button>
+              </Link>
+
+              <Link href="/account/addresses">
+                <Button variant="outline" className="w-full">
+                  Saved Addresses
+                </Button>
+              </Link>
+
+              <Link href="/wishlist">
+                <Button variant="outline" className="w-full">
+                  Wishlist
+                </Button>
               </Link>
 
               <Link href="/products">

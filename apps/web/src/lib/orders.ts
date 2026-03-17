@@ -1,5 +1,6 @@
 import { db } from "@ecommerce/db";
 import { getCart, getCurrentCartUser } from "@/lib/cart";
+import { getSavedAddressById } from "@/lib/addresses";
 
 type CheckoutInput = {
   fullName: string;
@@ -12,7 +13,14 @@ type CheckoutInput = {
   postalCode?: string;
   country: string;
   notes?: string;
+  paymentMethod: "COD" | "MANUAL";
+  savedAddressId?: string;
+  saveAddress?: boolean;
 };
+
+export type OrderWithRelations = Awaited<ReturnType<typeof getOrderByNumber>> extends infer T
+  ? Exclude<T, undefined>
+  : never;
 
 function generateOrderNumber() {
   const now = new Date();
@@ -30,7 +38,7 @@ export async function createOrderFromCart(input: CheckoutInput) {
 
   const user = await getCurrentCartUser();
 
-  const subtotal = cart.items.reduce((sum, item) => {
+  const subtotal = cart.items.reduce((sum: number, item) => {
     const unitPrice = Number(item.variant?.price ?? item.product.basePrice);
     return sum + unitPrice * item.quantity;
   }, 0);
@@ -42,21 +50,38 @@ export async function createOrderFromCart(input: CheckoutInput) {
 
   const orderNumber = generateOrderNumber();
 
-  const result = await db.$transaction(async (tx) => {
-    const address = await tx.address.create({
-      data: {
-        userId: user.id,
-        type: "SHIPPING",
-        fullName: input.fullName,
-        phone: input.phone || null,
-        line1: input.line1,
-        line2: input.line2 || null,
-        city: input.city,
-        state: input.state || null,
-        postalCode: input.postalCode || null,
-        country: input.country,
-      },
-    });
+  const result = await db.$transaction(async (tx: any) => {
+    let shippingAddressId: string | null = null;
+    let billingAddressId: string | null = null;
+
+    if (input.savedAddressId) {
+      const savedAddress = await getSavedAddressById(input.savedAddressId);
+
+      if (!savedAddress) {
+        throw new Error("Saved address not found");
+      }
+
+      shippingAddressId = savedAddress.id;
+      billingAddressId = savedAddress.id;
+    } else {
+      const address = await tx.address.create({
+        data: {
+          userId: user.id,
+          type: "SHIPPING",
+          fullName: input.fullName,
+          phone: input.phone || null,
+          line1: input.line1,
+          line2: input.line2 || null,
+          city: input.city,
+          state: input.state || null,
+          postalCode: input.postalCode || null,
+          country: input.country,
+        },
+      });
+
+      shippingAddressId = address.id;
+      billingAddressId = address.id;
+    }
 
     const order = await tx.order.create({
       data: {
@@ -65,6 +90,7 @@ export async function createOrderFromCart(input: CheckoutInput) {
         status: "PENDING",
         paymentStatus: "PENDING",
         fulfillmentStatus: "UNFULFILLED",
+        paymentMethod: input.paymentMethod,
         subtotal,
         discountTotal,
         shippingTotal,
@@ -72,8 +98,8 @@ export async function createOrderFromCart(input: CheckoutInput) {
         total,
         currency: "BHD",
         notes: input.notes || null,
-        shippingAddressId: address.id,
-        billingAddressId: address.id,
+        shippingAddressId,
+        billingAddressId,
       },
     });
 
@@ -82,8 +108,8 @@ export async function createOrderFromCart(input: CheckoutInput) {
       const compareAtPrice = item.variant?.compareAtPrice
         ? Number(item.variant.compareAtPrice)
         : item.product.compareAtPrice
-        ? Number(item.product.compareAtPrice)
-        : null;
+          ? Number(item.product.compareAtPrice)
+          : null;
 
       await tx.orderItem.create({
         data: {
@@ -95,7 +121,8 @@ export async function createOrderFromCart(input: CheckoutInput) {
           variantTitle: item.variant?.title || null,
           sku: item.variant?.sku || item.product.sku || null,
           imageUrl:
-            item.product.images.find((img) => img.isPrimary)?.url ||
+            item.product.images.find((img: { isPrimary: boolean; url: string }) => img.isPrimary)
+              ?.url ||
             item.product.images[0]?.url ||
             null,
           unitPrice,
@@ -134,7 +161,10 @@ export async function createOrderFromCart(input: CheckoutInput) {
         status: "PENDING",
         paymentStatus: "PENDING",
         fulfillmentStatus: "UNFULFILLED",
-        note: "Order placed successfully",
+        note:
+          input.paymentMethod === "COD"
+            ? "Order placed with Cash on Delivery"
+            : "Order placed with Manual Payment",
       },
     });
 
