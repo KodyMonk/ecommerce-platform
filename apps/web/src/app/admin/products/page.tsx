@@ -5,8 +5,7 @@ import { getAdminProducts } from "@/lib/admin-products";
 
 type SearchParams = Promise<{
   page?: string;
-  sortBy?: string;
-  sortOrder?: string;
+  search?: string;
   status?: string;
 }>;
 
@@ -23,19 +22,7 @@ export default async function AdminProductsPage({
   const params = await searchParams;
 
   const page = Number(params.page || "1");
-  const sortBy =
-    params.sortBy === "name" ||
-    params.sortBy === "basePrice" ||
-    params.sortBy === "stock" ||
-    params.sortBy === "createdAt"
-      ? params.sortBy
-      : "createdAt";
-
-  const sortOrder =
-    params.sortOrder === "asc" || params.sortOrder === "desc"
-      ? params.sortOrder
-      : "desc";
-
+  const search = params.search || "";
   const status =
     params.status === "active" ||
     params.status === "inactive" ||
@@ -47,28 +34,28 @@ export default async function AdminProductsPage({
   const result = await getAdminProducts({
     page,
     pageSize: 10,
-    sortBy,
-    sortOrder,
+    search,
     status,
   });
 
   function buildPageLink(nextPage: number) {
     const qs = new URLSearchParams();
     qs.set("page", String(nextPage));
-    qs.set("sortBy", sortBy);
-    qs.set("sortOrder", sortOrder);
+    qs.set("search", search);
     qs.set("status", status);
     return `/admin/products?${qs.toString()}`;
   }
 
   return (
-    <main className="container mx-auto px-6 py-10">
+    <main className="px-4 py-6 md:px-6 md:py-8">
       <div className="mb-8 flex items-center justify-between gap-4">
         <div>
-          <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">
+          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
             Admin
           </p>
-          <h1 className="mt-2 text-3xl font-semibold">Products</h1>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight">
+            Products
+          </h1>
         </div>
 
         <Link href="/admin/products/new">
@@ -76,57 +63,31 @@ export default async function AdminProductsPage({
         </Link>
       </div>
 
-      <div className="mb-6 rounded-2xl border p-4">
-        <form className="grid gap-4 md:grid-cols-4">
-          <div>
-            <label className="mb-2 block text-sm font-medium">Sort by</label>
-            <select
-              name="sortBy"
-              defaultValue={sortBy}
-              className="h-11 w-full rounded-md border bg-background px-3 text-sm"
-            >
-              <option value="createdAt">Created Date</option>
-              <option value="name">Name</option>
-              <option value="basePrice">Price</option>
-              <option value="stock">Stock</option>
-            </select>
-          </div>
+      <div className="mb-6 rounded-3xl border bg-card p-4 shadow-sm">
+        <form className="grid gap-4 md:grid-cols-[1fr_220px_160px]">
+          <input
+            name="search"
+            defaultValue={search}
+            placeholder="Search products..."
+            className="h-11 rounded-md border bg-background px-3 text-sm"
+          />
 
-          <div>
-            <label className="mb-2 block text-sm font-medium">Order</label>
-            <select
-              name="sortOrder"
-              defaultValue={sortOrder}
-              className="h-11 w-full rounded-md border bg-background px-3 text-sm"
-            >
-              <option value="desc">Descending</option>
-              <option value="asc">Ascending</option>
-            </select>
-          </div>
+          <select
+            name="status"
+            defaultValue={status}
+            className="h-11 rounded-md border bg-background px-3 text-sm"
+          >
+            <option value="all">All Products</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="featured">Featured</option>
+          </select>
 
-          <div>
-            <label className="mb-2 block text-sm font-medium">Filter</label>
-            <select
-              name="status"
-              defaultValue={status}
-              className="h-11 w-full rounded-md border bg-background px-3 text-sm"
-            >
-              <option value="all">All</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-              <option value="featured">Featured</option>
-            </select>
-          </div>
-
-          <div className="flex items-end">
-            <Button type="submit" className="w-full">
-              Apply
-            </Button>
-          </div>
+          <Button type="submit">Apply</Button>
         </form>
       </div>
 
-            <AdminProductsTable
+      <AdminProductsTable
         products={result.products.map((product) => ({
           ...product,
           basePrice: Number(product.basePrice),
@@ -139,19 +100,13 @@ export default async function AdminProductsPage({
         </p>
 
         <div className="flex gap-2">
-          <Link
-            href={buildPageLink(Math.max(1, result.page - 1))}
-            aria-disabled={result.page <= 1}
-          >
+          <Link href={buildPageLink(Math.max(1, result.page - 1))}>
             <Button variant="outline" disabled={result.page <= 1}>
               Previous
             </Button>
           </Link>
 
-          <Link
-            href={buildPageLink(Math.min(result.totalPages, result.page + 1))}
-            aria-disabled={result.page >= result.totalPages}
-          >
+          <Link href={buildPageLink(Math.min(result.totalPages, result.page + 1))}>
             <Button variant="outline" disabled={result.page >= result.totalPages}>
               Next
             </Button>

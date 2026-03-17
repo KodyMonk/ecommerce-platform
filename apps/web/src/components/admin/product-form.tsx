@@ -1,255 +1,258 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-type OptionItem = {
+type BrandItem = {
   id: string;
   name: string;
 };
 
-type ProductFormProps = {
-  product?: {
-    id: string;
-    name: string;
-    slug: string;
-    description?: string | null;
+type CategoryItem = {
+  id: string;
+  name: string;
+};
+
+type Props = {
+  mode: "create" | "edit";
+  productId?: string;
+  brands: BrandItem[];
+  categories: CategoryItem[];
+  initialValues?: {
+    name?: string;
+    slug?: string;
     shortDescription?: string | null;
-    basePrice: number | string;
-    stock: number;
+    description?: string | null;
+    basePrice?: number;
+    stock?: number;
     brandId?: string | null;
     categoryId?: string | null;
-    isActive: boolean;
-    isFeatured: boolean;
-    images?: { url: string }[];
+    isActive?: boolean;
+    isFeatured?: boolean;
+    imageUrl?: string | null;
   };
-  brands?: OptionItem[];
-  categories?: OptionItem[];
 };
 
 export default function ProductForm({
-  product,
-  brands = [],
-  categories = [],
-}: ProductFormProps) {
+  mode,
+  productId,
+  brands,
+  categories,
+  initialValues,
+}: Props) {
   const router = useRouter();
-
-  const initialImageUrl = product?.images?.[0]?.url || "";
-
-  const [form, setForm] = useState({
-    name: product?.name || "",
-    slug: product?.slug || "",
-    shortDescription: product?.shortDescription || "",
-    description: product?.description || "",
-    basePrice: String(product?.basePrice ?? ""),
-    stock: String(product?.stock ?? 0),
-    brandId: product?.brandId || "",
-    categoryId: product?.categoryId || "",
-    isActive: product?.isActive ?? true,
-    isFeatured: product?.isFeatured ?? false,
-    imageUrl: initialImageUrl,
-  });
-
   const [loading, setLoading] = useState(false);
 
-  const previewImage = useMemo(() => form.imageUrl.trim(), [form.imageUrl]);
+  const [form, setForm] = useState({
+    name: initialValues?.name || "",
+    slug: initialValues?.slug || "",
+    shortDescription: initialValues?.shortDescription || "",
+    description: initialValues?.description || "",
+    basePrice: String(initialValues?.basePrice ?? 0),
+    stock: String(initialValues?.stock ?? 0),
+    brandId: initialValues?.brandId || "",
+    categoryId: initialValues?.categoryId || "",
+    isActive: initialValues?.isActive ?? true,
+    isFeatured: initialValues?.isFeatured ?? false,
+    imageUrl: initialValues?.imageUrl || "",
+  });
 
-  function update(name: string, value: string | boolean) {
+  function updateField(name: string, value: string | boolean) {
     setForm((prev) => ({ ...prev, [name]: value }));
   }
 
-  async function submit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
     try {
       setLoading(true);
 
-      const res = await fetch("/api/admin/products", {
-        method: product ? "PATCH" : "POST",
+      const endpoint =
+        mode === "create"
+          ? "/api/admin/products"
+          : `/api/admin/products/${productId}`;
+
+      const method = mode === "create" ? "POST" : "PATCH";
+
+      const res = await fetch(endpoint, {
+        method,
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          id: product?.id,
           ...form,
+          basePrice: Number(form.basePrice),
+          stock: Number(form.stock),
         }),
       });
 
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        throw new Error(data.error || "Failed to save product");
+        throw new Error(
+          data.error ||
+            (mode === "create"
+              ? "Failed to create product"
+              : "Failed to update product")
+        );
       }
 
       router.push("/admin/products");
       router.refresh();
     } catch (error) {
       console.error(error);
-      alert("Could not save product");
+      alert(
+        mode === "create"
+          ? "Could not create product"
+          : "Could not update product"
+      );
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <form onSubmit={submit} className="grid gap-8 lg:grid-cols-[1fr_340px]">
-      <div className="space-y-6">
-        <div className="rounded-2xl border p-6">
-          <h2 className="mb-4 text-lg font-semibold">Basic details</h2>
-
-          <div className="space-y-4">
-            <Input
-              placeholder="Product name"
-              value={form.name}
-              onChange={(e) => update("name", e.target.value)}
-              required
-            />
-
-            <Input
-              placeholder="Slug"
-              value={form.slug}
-              onChange={(e) => update("slug", e.target.value)}
-              required
-            />
-
-            <Input
-              placeholder="Short description"
-              value={form.shortDescription}
-              onChange={(e) => update("shortDescription", e.target.value)}
-            />
-
-            <Input
-              placeholder="Full description"
-              value={form.description}
-              onChange={(e) => update("description", e.target.value)}
-            />
-          </div>
-        </div>
-
-        <div className="rounded-2xl border p-6">
-          <h2 className="mb-4 text-lg font-semibold">Pricing & stock</h2>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <Input
-              placeholder="Base price"
-              type="number"
-              step="0.01"
-              value={form.basePrice}
-              onChange={(e) => update("basePrice", e.target.value)}
-              required
-            />
-
-            <Input
-              placeholder="Stock"
-              type="number"
-              value={form.stock}
-              onChange={(e) => update("stock", e.target.value)}
-              required
-            />
-          </div>
-        </div>
-
-        <div className="rounded-2xl border p-6">
-          <h2 className="mb-4 text-lg font-semibold">Media</h2>
-
+    <form onSubmit={handleSubmit} className="space-y-6 rounded-3xl border bg-card p-6 shadow-sm">
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Product Name</label>
           <Input
-            placeholder="Primary image URL"
-            value={form.imageUrl}
-            onChange={(e) => update("imageUrl", e.target.value)}
+            value={form.name}
+            onChange={(e) => updateField("name", e.target.value)}
+            placeholder="Product name"
+            required
           />
+        </div>
 
-          {previewImage ? (
-            <div className="relative mt-4 aspect-square max-w-xs overflow-hidden rounded-xl border bg-muted">
-              <Image
-                src={previewImage}
-                alt={form.name || "Preview"}
-                fill
-                className="object-cover"
-                sizes="320px"
-              />
-            </div>
-          ) : null}
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Slug</label>
+          <Input
+            value={form.slug}
+            onChange={(e) => updateField("slug", e.target.value)}
+            placeholder="product-slug"
+            required
+          />
         </div>
       </div>
 
-      <aside className="space-y-6">
-        <div className="rounded-2xl border p-6">
-          <h2 className="mb-4 text-lg font-semibold">Organization</h2>
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Short Description</label>
+        <Input
+          value={form.shortDescription}
+          onChange={(e) => updateField("shortDescription", e.target.value)}
+          placeholder="Short description"
+        />
+      </div>
 
-          <div className="space-y-4">
-            <div>
-              <label className="mb-2 block text-sm font-medium">Brand</label>
-              <select
-                value={form.brandId}
-                onChange={(e) => update("brandId", e.target.value)}
-                className="h-11 w-full rounded-md border bg-background px-3 text-sm"
-              >
-                <option value="">No brand</option>
-                {brands.map((brand) => (
-                  <option key={brand.id} value={brand.id}>
-                    {brand.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Description</label>
+        <textarea
+          value={form.description}
+          onChange={(e) => updateField("description", e.target.value)}
+          placeholder="Full product description"
+          className="min-h-28 w-full rounded-md border bg-background px-3 py-2 text-sm"
+        />
+      </div>
 
-            <div>
-              <label className="mb-2 block text-sm font-medium">Category</label>
-              <select
-                value={form.categoryId}
-                onChange={(e) => update("categoryId", e.target.value)}
-                className="h-11 w-full rounded-md border bg-background px-3 text-sm"
-              >
-                <option value="">No category</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Base Price</label>
+          <Input
+            type="number"
+            step="0.01"
+            value={form.basePrice}
+            onChange={(e) => updateField("basePrice", e.target.value)}
+            placeholder="0.00"
+            required
+          />
         </div>
 
-        <div className="rounded-2xl border p-6">
-          <h2 className="mb-4 text-lg font-semibold">Visibility</h2>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Stock</label>
+          <Input
+            type="number"
+            value={form.stock}
+            onChange={(e) => updateField("stock", e.target.value)}
+            placeholder="0"
+            required
+          />
+        </div>
+      </div>
 
-          <div className="space-y-4">
-            <label className="flex items-center gap-3 text-sm">
-              <input
-                type="checkbox"
-                checked={form.isActive}
-                onChange={(e) => update("isActive", e.target.checked)}
-              />
-              Active product
-            </label>
-
-            <label className="flex items-center gap-3 text-sm">
-              <input
-                type="checkbox"
-                checked={form.isFeatured}
-                onChange={(e) => update("isFeatured", e.target.checked)}
-              />
-              Featured product
-            </label>
-          </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Brand</label>
+          <select
+            value={form.brandId}
+            onChange={(e) => updateField("brandId", e.target.value)}
+            className="h-11 w-full rounded-md border bg-background px-3 text-sm"
+          >
+            <option value="">No brand</option>
+            {brands.map((brand) => (
+              <option key={brand.id} value={brand.id}>
+                {brand.name}
+              </option>
+            ))}
+          </select>
         </div>
 
-        <div className="rounded-2xl border p-6">
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading
-              ? product
-                ? "Updating..."
-                : "Creating..."
-              : product
-              ? "Update Product"
-              : "Create Product"}
-          </Button>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Category</label>
+          <select
+            value={form.categoryId}
+            onChange={(e) => updateField("categoryId", e.target.value)}
+            className="h-11 w-full rounded-md border bg-background px-3 text-sm"
+          >
+            <option value="">No category</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
         </div>
-      </aside>
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Primary Image URL</label>
+        <Input
+          value={form.imageUrl}
+          onChange={(e) => updateField("imageUrl", e.target.value)}
+          placeholder="https://..."
+        />
+      </div>
+
+      <div className="flex flex-wrap gap-6">
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={form.isActive}
+            onChange={(e) => updateField("isActive", e.target.checked)}
+          />
+          Active product
+        </label>
+
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={form.isFeatured}
+            onChange={(e) => updateField("isFeatured", e.target.checked)}
+          />
+          Featured product
+        </label>
+      </div>
+
+      <Button type="submit" disabled={loading}>
+        {loading
+          ? mode === "create"
+            ? "Creating..."
+            : "Updating..."
+          : mode === "create"
+            ? "Create Product"
+            : "Update Product"}
+      </Button>
     </form>
   );
 }

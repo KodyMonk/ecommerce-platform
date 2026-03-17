@@ -3,8 +3,7 @@ import { db } from "@ecommerce/db";
 type AdminProductsParams = {
   page?: number;
   pageSize?: number;
-  sortBy?: "createdAt" | "name" | "basePrice" | "stock";
-  sortOrder?: "asc" | "desc";
+  search?: string;
   status?: "all" | "active" | "inactive" | "featured";
 };
 
@@ -13,24 +12,33 @@ export async function getAdminProducts(params: AdminProductsParams = {}) {
   const pageSize = Math.max(1, Math.min(50, params.pageSize ?? 10));
   const skip = (page - 1) * pageSize;
 
-  const sortBy = params.sortBy ?? "createdAt";
-  const sortOrder = params.sortOrder ?? "desc";
+  const search = (params.search || "").trim();
   const status = params.status ?? "all";
 
-  const where =
-    status === "active"
+  const where = {
+    ...(search
+      ? {
+          OR: [
+            { name: { contains: search, mode: "insensitive" as const } },
+            { slug: { contains: search, mode: "insensitive" as const } },
+            { sku: { contains: search, mode: "insensitive" as const } },
+          ],
+        }
+      : {}),
+    ...(status === "active"
       ? { isActive: true }
       : status === "inactive"
-      ? { isActive: false }
-      : status === "featured"
-      ? { isFeatured: true }
-      : {};
+        ? { isActive: false }
+        : status === "featured"
+          ? { isFeatured: true }
+          : {}),
+  };
 
   const [products, total] = await Promise.all([
     db.product.findMany({
       where,
       orderBy: {
-        [sortBy]: sortOrder,
+        createdAt: "desc",
       },
       skip,
       take: pageSize,
@@ -52,16 +60,13 @@ export async function getAdminProducts(params: AdminProductsParams = {}) {
     db.product.count({ where }),
   ]);
 
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
-
   return {
     products,
     total,
-    totalPages,
     page,
     pageSize,
-    sortBy,
-    sortOrder,
+    totalPages: Math.max(1, Math.ceil(total / pageSize)),
+    search,
     status,
   };
 }
@@ -104,9 +109,6 @@ export async function getAdminProduct(id: string) {
 
 export async function getAdminBrands() {
   return db.brand.findMany({
-    where: {
-      isActive: true,
-    },
     orderBy: {
       name: "asc",
     },
@@ -115,9 +117,6 @@ export async function getAdminBrands() {
 
 export async function getAdminCategories() {
   return db.category.findMany({
-    where: {
-      isActive: true,
-    },
     orderBy: {
       name: "asc",
     },
@@ -127,8 +126,8 @@ export async function getAdminCategories() {
 type ProductInput = {
   name: string;
   slug: string;
-  description?: string;
   shortDescription?: string;
+  description?: string;
   basePrice: number;
   stock: number;
   brandId?: string | null;
@@ -143,21 +142,19 @@ export async function createAdminProduct(data: ProductInput) {
     data: {
       name: data.name,
       slug: data.slug,
-      description: data.description || null,
       shortDescription: data.shortDescription || null,
+      description: data.description || null,
       basePrice: data.basePrice,
       stock: data.stock,
+      currency: "BHD",
       brandId: data.brandId || null,
       categoryId: data.categoryId || null,
       isActive: data.isActive,
       isFeatured: data.isFeatured,
-      currency: "BHD",
-      trackInventory: true,
       images: data.imageUrl
         ? {
             create: {
               url: data.imageUrl,
-              alt: data.name,
               isPrimary: true,
               sortOrder: 0,
             },
@@ -180,14 +177,14 @@ export async function updateAdminProduct(id: string, data: ProductInput) {
     },
   });
 
-  return db.$transaction(async (tx) => {
+  return db.$transaction(async (tx: any) => {
     const product = await tx.product.update({
       where: { id },
       data: {
         name: data.name,
         slug: data.slug,
-        description: data.description || null,
         shortDescription: data.shortDescription || null,
+        description: data.description || null,
         basePrice: data.basePrice,
         stock: data.stock,
         brandId: data.brandId || null,
@@ -205,7 +202,6 @@ export async function updateAdminProduct(id: string, data: ProductInput) {
           },
           data: {
             url: data.imageUrl,
-            alt: data.name,
             isPrimary: true,
             sortOrder: 0,
           },
@@ -215,7 +211,6 @@ export async function updateAdminProduct(id: string, data: ProductInput) {
           data: {
             productId: id,
             url: data.imageUrl,
-            alt: data.name,
             isPrimary: true,
             sortOrder: 0,
           },
@@ -227,202 +222,24 @@ export async function updateAdminProduct(id: string, data: ProductInput) {
   });
 }
 
+export async function deleteAdminProduct(id: string) {
+  return db.product.delete({
+    where: {
+      id,
+    },
+  });
+}
+
 export async function toggleAdminProductFeatured(id: string, isFeatured: boolean) {
   return db.product.update({
     where: { id },
-    data: {
-      isFeatured,
-    },
+    data: { isFeatured },
   });
 }
 
 export async function toggleAdminProductActive(id: string, isActive: boolean) {
   return db.product.update({
     where: { id },
-    data: {
-      isActive,
-    },
-  });
-}
-
-export async function createMultiOptionVariants(input: {
-  productId: string;
-  options: {
-    name: string;
-    values: string[];
-  }[];
-}) {
-  const product = await db.product.findUnique({
-    where: { id: input.productId },
-    include: {
-      options: {
-        include: {
-          values: true,
-        },
-      },
-      variants: {
-        include: {
-          values: {
-            include: {
-              optionValue: {
-                include: {
-                  option: true,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  });
-
-  if (!product) {
-    throw new Error("Product not found");
-  }
-
-  const cleanedOptions = input.options
-    .map((option) => ({
-      name: option.name.trim(),
-      values: option.values.map((v) => v.trim()).filter(Boolean),
-    }))
-    .filter((option) => option.name && option.values.length > 0);
-
-  if (cleanedOptions.length === 0) {
-    throw new Error("At least one option with values is required");
-  }
-
-  function cartesianProduct(arrays: string[][]): string[][] {
-    return arrays.reduce<string[][]>(
-      (acc, curr) => acc.flatMap((x) => curr.map((y) => [...x, y])),
-      [[]]
-    );
-  }
-
-  return db.$transaction(async (tx) => {
-    const optionMap: {
-      optionId: string;
-      optionName: string;
-      values: { id: string; value: string }[];
-    }[] = [];
-
-    for (let optionIndex = 0; optionIndex < cleanedOptions.length; optionIndex++) {
-      const inputOption = cleanedOptions[optionIndex];
-
-      let existingOption = product.options.find(
-        (o) => o.name.toLowerCase() === inputOption.name.toLowerCase()
-      );
-
-      if (!existingOption) {
-        existingOption = await tx.productOption.create({
-          data: {
-            productId: product.id,
-            name: inputOption.name,
-            sortOrder: optionIndex,
-          },
-          include: {
-            values: true,
-          },
-        });
-      }
-
-      const optionValues: { id: string; value: string }[] = [];
-
-      for (let valueIndex = 0; valueIndex < inputOption.values.length; valueIndex++) {
-        const inputValue = inputOption.values[valueIndex];
-
-        let existingValue = existingOption.values.find(
-          (v) => v.value.toLowerCase() === inputValue.toLowerCase()
-        );
-
-        if (!existingValue) {
-          existingValue = await tx.productOptionValue.create({
-            data: {
-              optionId: existingOption.id,
-              value: inputValue,
-              sortOrder: valueIndex,
-            },
-          });
-        }
-
-        optionValues.push({
-          id: existingValue.id,
-          value: existingValue.value,
-        });
-      }
-
-      optionMap.push({
-        optionId: existingOption.id,
-        optionName: existingOption.name,
-        values: optionValues,
-      });
-    }
-
-    const valueArrays = optionMap.map((option) => option.values.map((v) => v.value));
-    const combinations = cartesianProduct(valueArrays);
-
-    for (const combination of combinations) {
-      const title = combination.join(" / ");
-
-      const existingVariant = product.variants.find(
-        (variant) => variant.title.toLowerCase() === title.toLowerCase()
-      );
-
-      if (existingVariant) continue;
-
-      const createdVariant = await tx.productVariant.create({
-        data: {
-          productId: product.id,
-          title,
-          price: product.basePrice,
-          stock: 0,
-          isActive: true,
-          trackInventory: true,
-          isDefault: product.variants.length === 0,
-        },
-      });
-
-      for (let i = 0; i < combination.length; i++) {
-        const option = optionMap[i];
-        const selectedValue = option.values.find(
-          (v) => v.value.toLowerCase() === combination[i].toLowerCase()
-        );
-
-        if (!selectedValue) continue;
-
-        await tx.productVariantValue.create({
-          data: {
-            variantId: createdVariant.id,
-            optionValueId: selectedValue.id,
-          },
-        });
-      }
-    }
-
-    return tx.product.findUnique({
-      where: { id: product.id },
-      include: {
-        options: {
-          include: {
-            values: true,
-          },
-        },
-        variants: {
-          orderBy: {
-            createdAt: "asc",
-          },
-          include: {
-            values: {
-              include: {
-                optionValue: {
-                  include: {
-                    option: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    });
+    data: { isActive },
   });
 }

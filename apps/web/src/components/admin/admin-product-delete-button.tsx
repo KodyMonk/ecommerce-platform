@@ -18,7 +18,7 @@ export default function AdminProductDeleteButton({
 
   async function handleDelete() {
     const confirmed = window.confirm(
-      `Delete "${productName}"? This cannot be undone.`
+      `Delete "${productName}" permanently?`
     );
 
     if (!confirmed) return;
