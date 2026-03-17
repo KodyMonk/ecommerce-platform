@@ -5,19 +5,40 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-export default function AddressForm() {
+type Props = {
+  mode?: "create" | "edit";
+  addressId?: string;
+  initialValues?: {
+    fullName?: string;
+    phone?: string;
+    line1?: string;
+    line2?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    country?: string;
+  };
+  onSuccess?: () => void;
+};
+
+export default function AddressForm({
+  mode = "create",
+  addressId,
+  initialValues,
+  onSuccess,
+}: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
-    fullName: "",
-    phone: "",
-    line1: "",
-    line2: "",
-    city: "",
-    state: "",
-    postalCode: "",
-    country: "Bahrain",
+    fullName: initialValues?.fullName || "",
+    phone: initialValues?.phone || "",
+    line1: initialValues?.line1 || "",
+    line2: initialValues?.line2 || "",
+    city: initialValues?.city || "",
+    state: initialValues?.state || "",
+    postalCode: initialValues?.postalCode || "",
+    country: initialValues?.country || "Bahrain",
   });
 
   function update(name: string, value: string) {
@@ -31,34 +52,49 @@ export default function AddressForm() {
       setLoading(true);
 
       const res = await fetch("/api/account/addresses", {
-        method: "POST",
+        method: mode === "edit" ? "PATCH" : "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...(mode === "edit" ? { addressId } : {}),
+          ...form,
+        }),
       });
 
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        throw new Error(data.error || "Failed to save address");
+        throw new Error(
+          data.error ||
+            (mode === "edit"
+              ? "Failed to update address"
+              : "Failed to save address")
+        );
       }
 
-      setForm({
-        fullName: "",
-        phone: "",
-        line1: "",
-        line2: "",
-        city: "",
-        state: "",
-        postalCode: "",
-        country: "Bahrain",
-      });
+      if (mode === "create") {
+        setForm({
+          fullName: "",
+          phone: "",
+          line1: "",
+          line2: "",
+          city: "",
+          state: "",
+          postalCode: "",
+          country: "Bahrain",
+        });
+      }
 
+      onSuccess?.();
       router.refresh();
     } catch (error) {
       console.error(error);
-      alert("Could not save address");
+      alert(
+        mode === "edit"
+          ? "Could not update address"
+          : "Could not save address"
+      );
     } finally {
       setLoading(false);
     }
@@ -123,7 +159,13 @@ export default function AddressForm() {
       </div>
 
       <Button type="submit" disabled={loading}>
-        {loading ? "Saving..." : "Save address"}
+        {loading
+          ? mode === "edit"
+            ? "Updating..."
+            : "Saving..."
+          : mode === "edit"
+            ? "Update address"
+            : "Save address"}
       </Button>
     </form>
   );
